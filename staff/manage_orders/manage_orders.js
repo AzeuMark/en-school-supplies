@@ -67,16 +67,13 @@
 
     return `
       <div class="order-items-box">
-        <div class="order-items-scroll">
-          <div class="order-items-list" aria-label="Ordered items preview">
-            ${previewItems.map((it) => `
-              <div class="order-item-line">
-                ${EN.escapeHtml(it.item_name_snapshot)} x ${it.quantity} <span class="text-muted">(${EN.formatPrice(it.unit_price)})</span>
-              </div>
-            `).join('')}
-          </div>
+        <div class="order-items-list" aria-label="Ordered items preview">
+          ${previewItems.map((it) => `
+            <div class="order-item-line">
+              ${EN.escapeHtml(it.item_name_snapshot)} x ${it.quantity} <span class="text-muted">(${EN.formatPrice(it.unit_price)})</span>
+            </div>
+          `).join('')}
         </div>
-        ${order.guest_note ? `<div class="order-note"><strong>Note:</strong> ${EN.escapeHtml(order.guest_note)}</div>` : ''}
         ${items.length > previewItemLimit ? `<button type="button" class="btn btn-sm btn-secondary order-items-view-all" data-view-all="${order.id}">View All (${items.length})</button>` : ''}
       </div>
     `;
@@ -93,7 +90,7 @@
       actions.push(`<button class="btn btn-sm btn-icon action-icon action-claim" ${attr}="claim" data-id="${order.id}" title="Mark Claimed" aria-label="Mark Claimed">🎟️</button>`);
     }
 
-    actions.push(`<a class="btn btn-sm btn-receipt" target="_blank" href="${EN.BASE}/receipt.php?order=${encodeURIComponent(order.order_code)}&pin=${encodeURIComponent(order.claim_pin || '')}" title="View Receipt">🧾 Receipt</a>`);
+    actions.push(`<a class="btn btn-sm btn-icon btn-receipt" target="_blank" href="${EN.BASE}/receipt.php?order=${encodeURIComponent(order.order_code)}&pin=${encodeURIComponent(order.claim_pin || '')}" title="View Receipt" aria-label="View Receipt">🧾</a>`);
 
     if (canDelete && order.status !== 'claimed') {
       actions.push(`<button class="btn btn-sm btn-icon action-icon action-delete" ${attr}="delete" data-id="${order.id}" title="Delete Order" aria-label="Delete Order">🗑️</button>`);
@@ -113,11 +110,12 @@
     tbl.innerHTML = `
       <div class="table-wrap"><table class="table">
         <thead><tr>
-          <th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
+          <th>Order ID</th><th>Customer</th><th>Items</th><th>Note</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
         </tr></thead>
         <tbody>
           ${orders.map((order) => {
             const pinDisplay = order.claim_pin_display || order.claim_pin || '';
+            const hasNote = Boolean(order.guest_note && String(order.guest_note).trim() !== '');
             return `
               <tr data-row="${order.id}">
                 <td>
@@ -126,6 +124,11 @@
                 </td>
                 <td>${customerLabel(order)}</td>
                 <td>${renderItemsPreview(order)}</td>
+                <td>
+                  <div class="order-note-box">
+                    <div class="order-note-scroll">${hasNote ? EN.escapeHtml(order.guest_note) : '<span class="text-muted">-</span>'}</div>
+                  </div>
+                </td>
                 <td>${EN.formatPrice(order.total_price)}</td>
                 <td><span class="badge status-${order.status}">${statusLabel(order.status)}</span></td>
                 <td>${formatOrderDate(order.created_at)}</td>

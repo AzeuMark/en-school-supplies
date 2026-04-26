@@ -22,7 +22,7 @@ include __DIR__ . '/../../includes/layout_header.php';
 </div>
 
 <div class="toolbar">
-  <div class="search-box"><input class="input" id="search" placeholder="Search by order code or name..."></div>
+  <div class="search-box"><input class="input" id="search" placeholder="Search orders, customers, items, notes, pins, status..."></div>
 </div>
 
 <div id="orders-tbl"></div>

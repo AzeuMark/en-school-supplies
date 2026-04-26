@@ -27,9 +27,44 @@ if ($status !== '' && in_array($status, ['pending', 'ready', 'claimed', 'cancell
     $params[] = $status;
 }
 if ($q !== '') {
-    $where[]  = '(o.order_code LIKE ? OR o.guest_name LIKE ? OR u.full_name LIKE ?)';
+    $where[]  = "(
+        o.order_code LIKE ?
+        OR CAST(o.id AS CHAR) LIKE ?
+        OR o.guest_name LIKE ?
+        OR o.guest_phone LIKE ?
+        OR o.guest_note LIKE ?
+        OR o.status LIKE ?
+        OR CAST(o.total_price AS CHAR) LIKE ?
+        OR o.claim_pin LIKE ?
+        OR u.full_name LIKE ?
+        OR u.username LIKE ?
+        OR u.email LIKE ?
+        OR EXISTS (
+            SELECT 1
+            FROM order_items oi
+            WHERE oi.order_id = o.id
+              AND (
+                  oi.item_name_snapshot LIKE ?
+                  OR CAST(oi.quantity AS CHAR) LIKE ?
+                  OR CAST(oi.unit_price AS CHAR) LIKE ?
+              )
+        )
+    )";
     $like = '%' . $q . '%';
-    $params[] = $like; $params[] = $like; $params[] = $like;
+    $params[] = $like; // order code
+    $params[] = $like; // order id
+    $params[] = $like; // guest name
+    $params[] = $like; // guest phone
+    $params[] = $like; // guest note
+    $params[] = $like; // status
+    $params[] = $like; // total
+    $params[] = $like; // claim pin
+    $params[] = $like; // customer full name
+    $params[] = $like; // customer username
+    $params[] = $like; // customer email
+    $params[] = $like; // item name
+    $params[] = $like; // item qty
+    $params[] = $like; // item unit price
 }
 
 $sql_where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
