@@ -27,8 +27,8 @@ include __DIR__ . '/../../includes/layout_header.php';
 <div class="inventory-filters card">
   <div class="inventory-filters-head">
     <div>
-      <h3>Find Items Faster</h3>
-      <p>Use search, category, stock level, and sorting controls to narrow your list quickly.</p>
+      <h3>Smart Filters</h3>
+      <p>Search, filter, and sort with fewer controls for faster inventory browsing.</p>
     </div>
     <button class="btn btn-secondary btn-sm" type="button" data-reset-filters>Reset Filters</button>
   </div>
@@ -60,23 +60,21 @@ include __DIR__ . '/../../includes/layout_header.php';
     </label>
 
     <label class="inventory-control">
-      <span>Sort By</span>
-      <select class="select-native" id="sort-by" data-custom-select>
-        <option value="name">Name (Default)</option>
-        <option value="stock">Stock</option>
-        <option value="max_order">Max Order</option>
-        <option value="price">Price</option>
-      </select>
-    </label>
-
-    <label class="inventory-control">
-      <span>Order</span>
-      <select class="select-native" id="sort-dir" data-custom-select>
-        <option value="asc">Ascending</option>
-        <option value="desc">Descending</option>
+      <span>Sort</span>
+      <select class="select-native" id="sort-preset" data-custom-select>
+        <option value="name_asc">Name (A-Z)</option>
+        <option value="name_desc">Name (Z-A)</option>
+        <option value="stock_desc">Stock (High to Low)</option>
+        <option value="stock_asc">Stock (Low to High)</option>
+        <option value="price_asc">Price (Low to High)</option>
+        <option value="price_desc">Price (High to Low)</option>
+        <option value="max_order_desc">Max Order (High to Low)</option>
+        <option value="max_order_asc">Max Order (Low to High)</option>
       </select>
     </label>
   </div>
+
+  <p class="inventory-filter-summary text-muted" id="filter-summary">Showing all items • Sorted by Name (A-Z)</p>
 </div>
 
 <div class="inventory-table-shell card">

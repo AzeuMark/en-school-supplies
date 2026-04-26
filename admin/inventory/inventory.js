@@ -5,13 +5,51 @@
   const search = document.getElementById('search');
   const fCat = document.getElementById('filter-cat');
   const fStock = document.getElementById('filter-stock');
-  const sortBy = document.getElementById('sort-by');
-  const sortDir = document.getElementById('sort-dir');
+  const sortPreset = document.getElementById('sort-preset');
   const metaEl = document.getElementById('inventory-meta');
+  const filterSummaryEl = document.getElementById('filter-summary');
   const categories = window._categories || [];
   const defaultNames = window._defaultNames || [];
 
   let state = { page: 1, q: '', category: '', stockFilter: 'all', sortBy: 'name', sortDir: 'asc' };
+
+  const sortPresetMap = {
+    name_asc: { sortBy: 'name', sortDir: 'asc', label: 'Name (A-Z)' },
+    name_desc: { sortBy: 'name', sortDir: 'desc', label: 'Name (Z-A)' },
+    stock_desc: { sortBy: 'stock', sortDir: 'desc', label: 'Stock (High to Low)' },
+    stock_asc: { sortBy: 'stock', sortDir: 'asc', label: 'Stock (Low to High)' },
+    price_asc: { sortBy: 'price', sortDir: 'asc', label: 'Price (Low to High)' },
+    price_desc: { sortBy: 'price', sortDir: 'desc', label: 'Price (High to Low)' },
+    max_order_desc: { sortBy: 'max_order', sortDir: 'desc', label: 'Max Order (High to Low)' },
+    max_order_asc: { sortBy: 'max_order', sortDir: 'asc', label: 'Max Order (Low to High)' },
+  };
+
+  const stockFilterLabelMap = {
+    all: 'All Stock Levels',
+    in: 'In Stock',
+    low: 'Low Stock',
+    out: 'Out of Stock',
+  };
+
+  function getCurrentSortPreset() {
+    const found = Object.entries(sortPresetMap).find(([, v]) => v.sortBy === state.sortBy && v.sortDir === state.sortDir);
+    return found ? found[0] : 'name_asc';
+  }
+
+  function updateFilterSummary() {
+    if (!filterSummaryEl) return;
+    const parts = [];
+    if (state.q) parts.push(`Search: "${state.q}"`);
+    if (state.category) {
+      const cat = categories.find(c => String(c.id) === String(state.category));
+      parts.push(`Category: ${cat ? cat.category_name : 'Selected'}`);
+    }
+    if (state.stockFilter !== 'all') parts.push(`Stock: ${stockFilterLabelMap[state.stockFilter] || 'Filtered'}`);
+
+    const currentPreset = sortPresetMap[getCurrentSortPreset()] || sortPresetMap.name_asc;
+    const filtersText = parts.length ? parts.join(' • ') : 'Showing all items';
+    filterSummaryEl.textContent = `${filtersText} • Sorted by ${currentPreset.label}`;
+  }
 
   async function load() {
     tbl.innerHTML = '<div class="empty-state">Loading...</div>';
@@ -42,6 +80,7 @@
 
     render(data.items);
     Pagination.render(pagEl, { current: data.page, total: data.total_pages, onChange: (p) => { state.page = p; load(); } });
+    updateFilterSummary();
   }
 
   function render(items) {
@@ -278,17 +317,26 @@
   });
   fCat.addEventListener('change', () => { state.category = fCat.value; state.page = 1; load(); });
   fStock.addEventListener('change', () => { state.stockFilter = fStock.value; state.page = 1; load(); });
-  sortBy.addEventListener('change', () => { state.sortBy = sortBy.value; state.page = 1; load(); });
-  sortDir.addEventListener('change', () => { state.sortDir = sortDir.value; state.page = 1; load(); });
+  if (sortPreset) {
+    sortPreset.addEventListener('change', () => {
+      const preset = sortPresetMap[sortPreset.value] || sortPresetMap.name_asc;
+      state.sortBy = preset.sortBy;
+      state.sortDir = preset.sortDir;
+      state.page = 1;
+      load();
+    });
+  }
   document.querySelector('[data-reset-filters]').addEventListener('click', () => {
     state = { page: 1, q: '', category: '', stockFilter: 'all', sortBy: 'name', sortDir: 'asc' };
     search.value = '';
     fCat.value = '';
     fStock.value = 'all';
-    sortBy.value = 'name';
-    sortDir.value = 'asc';
+    if (sortPreset) sortPreset.value = 'name_asc';
     load();
   });
+
+  if (sortPreset) sortPreset.value = getCurrentSortPreset();
+  updateFilterSummary();
 
   load();
 })();

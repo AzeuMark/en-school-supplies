@@ -16,7 +16,10 @@ $stock_filter = (string)($_GET['stock_filter'] ?? 'all');
 $sort_by      = (string)($_GET['sort_by'] ?? 'name');
 $sort_dir     = strtolower((string)($_GET['sort_dir'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
 
-$low_pct = (int)get_setting('low_stock_percent', '10');
+$low_stock_threshold = (int)get_setting('low_stock_threshold', get_setting('low_stock_percent', '10'));
+if ($low_stock_threshold < 1) {
+    $low_stock_threshold = 1;
+}
 
 $where  = [];
 $params = [];
@@ -43,9 +46,8 @@ if ($stock_filter === 'in') {
     $where[] = 'i.stock_count <= 0';
 } elseif ($stock_filter === 'low') {
     $where[] = 'i.stock_count > 0';
-    $where[] = 'i.max_order_qty > 0';
-    $where[] = 'i.stock_count <= GREATEST(1, FLOOR(i.max_order_qty * ? / 100))';
-    $params[] = $low_pct;
+    $where[] = 'i.stock_count <= ?';
+    $params[] = $low_stock_threshold;
 }
 
 $sql_where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -87,7 +89,7 @@ foreach ($items as &$it) {
     $it['stock_count']   = (int)$it['stock_count'];
     $it['max_order_qty'] = (int)$it['max_order_qty'];
     if ($it['stock_count'] <= 0) $it['status'] = 'no_stock';
-    elseif ($it['max_order_qty'] > 0 && $it['stock_count'] <= max(1, (int)floor($it['max_order_qty'] * $low_pct / 100))) {
+    elseif ($it['stock_count'] <= $low_stock_threshold) {
         $it['status'] = 'low_stock';
     } else $it['status'] = 'on_stock';
 }

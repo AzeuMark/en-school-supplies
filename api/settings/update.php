@@ -46,7 +46,7 @@ if ($logoFile && ($logoFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FI
 $allowed = [
     'store_name', 'store_phone', 'store_email', 'timezone',
     'navbar_country_flag',
-    'auto_logout_hours', 'low_stock_percent', 'kiosk_idle_seconds',
+    'auto_logout_hours', 'low_stock_threshold', 'low_stock_percent', 'kiosk_idle_seconds',
     'force_dark', 'system_status', 'disable_no_login_orders', 'online_payment',
 ];
 
@@ -57,7 +57,8 @@ if (!is_array($settings) || empty($settings)) {
 
 $intRules = [
     'auto_logout_hours'  => ['min' => 1, 'max' => 72, 'label' => 'Auto-Logout (hours)'],
-    'low_stock_percent'  => ['min' => 1, 'max' => 100, 'label' => 'Low Stock Threshold (%)'],
+    'low_stock_threshold'=> ['min' => 1, 'max' => 100000, 'label' => 'Low Stock Threshold (units)'],
+    'low_stock_percent'  => ['min' => 1, 'max' => 100000, 'label' => 'Low Stock Threshold (units)'],
     'kiosk_idle_seconds' => ['min' => 30, 'max' => 600, 'label' => 'Kiosk Idle Timeout (seconds)'],
 ];
 
@@ -80,8 +81,17 @@ foreach ($settings as $key => $value) {
     if ($key === 'navbar_country_flag') {
         $value = navbar_country_flag_code($value);
     }
+
+    if ($key === 'low_stock_percent') {
+        $key = 'low_stock_threshold';
+    }
+
     set_setting($key, (string)$value);
     $updated++;
+
+    if ($key === 'low_stock_threshold') {
+        set_setting('low_stock_percent', (string)$value);
+    }
 }
 
 if ($logoUrl !== null) {

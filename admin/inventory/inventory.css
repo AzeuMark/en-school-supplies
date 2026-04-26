@@ -40,7 +40,7 @@
 
 .inventory-toolbar-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 2fr) repeat(4, minmax(150px, 1fr));
+  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(170px, 1fr));
   gap: 12px;
   align-items: end;
 }
@@ -65,6 +65,12 @@
 
 .inventory-control-search .search-box {
   min-width: 0;
+}
+
+.inventory-filter-summary {
+  margin: 12px 0 0;
+  font-size: .84rem;
+  line-height: 1.35;
 }
 
 .inventory-table-shell {
