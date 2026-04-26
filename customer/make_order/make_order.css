@@ -1,0 +1,7 @@
+/* Make Order — customer */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.ic-add { width: 100%; margin-top: 8px; }

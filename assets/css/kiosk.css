@@ -1,0 +1,51 @@
+/* ===== Kiosk full-screen overrides ===== */
+
+.kiosk-body {
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+.kiosk-header {
+  background: var(--primary); color: #fff;
+  padding: 16px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+.kiosk-header img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; background: #fff; }
+.kiosk-header h1 { font-size: 1.5rem; margin: 0; }
+.kiosk-header .ks-tagline { font-size: .875rem; opacity: .9; }
+.kiosk-header .spacer { flex: 1; }
+.kiosk-header .ks-time { font-size: 1rem; font-weight: 600; }
+
+.kiosk-main {
+  flex: 1; padding: 24px 32px 120px;
+  max-width: 1400px; width: 100%; margin: 0 auto;
+}
+
+.kiosk-toolbar {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Larger cards in kiosk */
+.kiosk-main .item-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.kiosk-main .item-card { padding: 16px; border-width: 3px; }
+.kiosk-main .item-card .name { font-size: 1.0625rem; }
+.kiosk-main .item-card .price { font-size: 1.375rem; }
+.kiosk-main .item-card .qty-stepper button { width: 40px; height: 40px; font-size: 22px; }
+.kiosk-main .item-card .qty-stepper input { width: 56px; height: 40px; font-size: 1.125rem; }
+
+.kiosk-disabled {
+  display: grid; place-items: center; min-height: 70vh; padding: 32px;
+}
+.kiosk-disabled .kd-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 48px;
+  max-width: 520px; text-align: center; box-shadow: var(--shadow-md);
+}
+.kiosk-disabled .kd-icon { font-size: 64px; margin-bottom: 16px; }
+.kiosk-disabled h2 { color: var(--primary); }
+
+/* Hide cart fab when kiosk-disabled state shows */
+.kiosk-disabled ~ .cart-fab,
+.kiosk-disabled ~ * .cart-fab { display: none; }

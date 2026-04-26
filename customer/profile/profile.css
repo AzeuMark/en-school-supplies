@@ -1,0 +1,6 @@
+/* Customer profile page (uses shared profile_content.php) */
+@media (max-width: 768px) {
+  .app-main > div[style*="grid-template-columns:280px"] {
+    grid-template-columns: 1fr !important;
+  }
+}

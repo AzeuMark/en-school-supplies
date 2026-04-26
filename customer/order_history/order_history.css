@@ -1,0 +1,8 @@
+/* Order History — customer */
+.items-detail { padding: 8px 0 4px; }
+.pin-display { font-family: monospace; font-size: 1.1rem; letter-spacing: 2px; color: var(--primary); }
+.actions { flex-wrap: wrap; }
+@media (max-width: 768px) {
+  .table th:nth-child(5), .table td:nth-child(5),
+  .table th:nth-child(6), .table td:nth-child(6) { display: none; }
+}

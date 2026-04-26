@@ -1,0 +1,162 @@
+// Admin — Inventory Management
+(function () {
+  const tbl = document.getElementById('inv-tbl');
+  const pagEl = document.getElementById('pagination');
+  const search = document.getElementById('search');
+  const fCat = document.getElementById('filter-cat');
+  const categories = window._categories || [];
+  const defaultNames = window._defaultNames || [];
+
+  let state = { page: 1, q: '', category: '' };
+
+  async function load() {
+    tbl.innerHTML = '<div class="empty-state">Loading...</div>';
+    const params = new URLSearchParams({ page: state.page, q: state.q, category: state.category, per_page: 15, in_stock: '' });
+    const res = await fetch(EN.BASE + '/api/inventory/get_items.php?' + params.toString());
+    const data = await res.json();
+    if (!data.ok) { tbl.innerHTML = '<div class="empty-state">Failed to load.</div>'; return; }
+    render(data.items);
+    Pagination.render(pagEl, { current: data.page, total: data.total_pages, onChange: (p) => { state.page = p; load(); } });
+  }
+
+  function render(items) {
+    if (!items.length) { tbl.innerHTML = '<div class="empty-state"><div class="es-icon">📚</div><div class="es-title">No items found</div></div>'; return; }
+    tbl.innerHTML = `<div class="table-wrap"><table class="table">
+      <thead><tr><th style="width:56px"></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Max/Order</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${items.map(it => {
+          const img = it.item_image ? `<img src="${EN.BASE}/${it.item_image}" style="width:48px;height:48px;object-fit:cover;border-radius:6px">` : '<span style="font-size:24px">📦</span>';
+          const stockClass = it.status === 'low_stock' ? 'badge-warning' : it.status === 'no_stock' ? 'badge-danger' : '';
+          return `<tr>
+            <td>${img}</td>
+            <td><strong>${EN.escapeHtml(it.item_name)}</strong></td>
+            <td>${EN.escapeHtml(it.category || '—')}</td>
+            <td>${EN.formatPrice(it.price)}</td>
+            <td><span class="badge ${stockClass}">${it.stock_count}</span></td>
+            <td>${it.max_order_qty}</td>
+            <td><div class="actions">
+              <button class="btn btn-sm btn-secondary" data-edit="${it.id}" title="Edit">✏️</button>
+              <button class="btn btn-sm btn-danger" data-del="${it.id}" data-name="${EN.escapeHtml(it.item_name)}" title="Delete">🗑️</button>
+            </div></td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+  }
+
+  function catOptions(selected) {
+    return `<option value="0">— None —</option>` + categories.map(c => `<option value="${c.id}" ${c.id == selected ? 'selected' : ''}>${EN.escapeHtml(c.category_name)}</option>`).join('');
+  }
+
+  function nameDatalist() {
+    return defaultNames.map(n => `<option value="${EN.escapeHtml(n)}">`).join('');
+  }
+
+  function itemFormHtml(it = {}) {
+    return `
+      <div class="field"><label>Item Name</label>
+        <input class="input" name="item_name" list="names-dl" required maxlength="150" value="${EN.escapeHtml(it.item_name || '')}">
+        <datalist id="names-dl">${nameDatalist()}</datalist>
+      </div>
+      <div class="field"><label>Category</label>
+        <select class="select-native" name="category_id">${catOptions(it.category_id || 0)}</select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="field"><label>Price (₱)</label><input class="input" name="price" type="number" step="0.01" min="0.01" required value="${it.price || ''}"></div>
+        <div class="field"><label>Stock</label><input class="input" name="stock_count" type="number" min="0" required value="${it.stock_count ?? ''}"></div>
+        <div class="field"><label>Max/Order</label><input class="input" name="max_order_qty" type="number" min="1" required value="${it.max_order_qty || 10}"></div>
+      </div>
+      <div class="field"><label>Image (optional, max 2 MB)</label><input type="file" name="item_image" accept="image/jpeg,image/png,image/webp"></div>`;
+  }
+
+  // Add item
+  document.querySelector('[data-add-item]').addEventListener('click', () => {
+    const bd = Modal.show({
+      title: 'Add Item', size: 'lg',
+      html: `<form id="add-form" enctype="multipart/form-data">${itemFormHtml()}</form>`,
+      footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-save-add>Add Item</button>`,
+    });
+    bd.querySelector('[data-save-add]').addEventListener('click', async () => {
+      const fd = new FormData(bd.querySelector('#add-form'));
+      try { await EN.api('/api/inventory/add_item.php', { formData: fd }); Modal.close(bd); EN.toast('Item added.', 'success'); load(); } catch (_) {}
+    });
+  });
+
+  // Edit / Delete
+  tbl.addEventListener('click', async (e) => {
+    const ed = e.target.closest('[data-edit]');
+    if (ed) {
+      const id = +ed.dataset.edit;
+      const data = await (await fetch(EN.BASE + '/api/inventory/get_items.php?per_page=1&in_stock=&id=' + id)).json();
+      const it = (data.items || [])[0] || {};
+
+      const bd = Modal.show({
+        title: 'Edit Item', size: 'lg',
+        html: `<form id="edit-form" enctype="multipart/form-data"><input type="hidden" name="id" value="${id}">${itemFormHtml(it)}</form>`,
+        footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-save-edit>Save</button>`,
+      });
+      bd.querySelector('[data-save-edit]').addEventListener('click', async () => {
+        const fd = new FormData(bd.querySelector('#edit-form'));
+        try { await EN.api('/api/inventory/edit_item.php', { formData: fd }); Modal.close(bd); EN.toast('Item updated.', 'success'); load(); } catch (_) {}
+      });
+      return;
+    }
+    const del = e.target.closest('[data-del]');
+    if (del) {
+      const ok = await Modal.confirm({ title: 'Delete item?', message: `Permanently delete "${del.dataset.name}"?`, confirmText: 'Delete', danger: true });
+      if (!ok) return;
+      try { await EN.api('/api/inventory/delete_item.php', { body: { id: +del.dataset.del } }); EN.toast('Item deleted.', 'success'); load(); } catch (_) {}
+    }
+  });
+
+  // Categories management
+  document.querySelector('[data-manage-categories]').addEventListener('click', async () => {
+    const res = await fetch(EN.BASE + '/api/inventory/categories.php');
+    const data = await res.json();
+    const cats = data.categories || [];
+    const bd = Modal.show({
+      title: 'Manage Categories', size: 'lg',
+      html: `
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input class="input" id="new-cat-name" placeholder="New category name..." maxlength="100">
+          <button class="btn" data-add-cat>Add</button>
+        </div>
+        <div id="cat-list">
+          ${cats.map(c => `<div class="flex items-center justify-between gap-2 p-2" style="border-bottom:1px solid var(--border)" data-cat-row="${c.id}">
+            <span>${EN.escapeHtml(c.category_name)}</span>
+            <div class="actions">
+              <button class="btn btn-sm btn-danger" data-del-cat="${c.id}">🗑️</button>
+            </div>
+          </div>`).join('')}
+        </div>`,
+      footer: `<button class="btn btn-secondary" data-modal-close>Close</button>`,
+    });
+    bd.querySelector('[data-add-cat]').addEventListener('click', async () => {
+      const name = bd.querySelector('#new-cat-name').value.trim();
+      if (!name) return;
+      try {
+        await EN.api('/api/inventory/categories.php', { body: { action: 'add', category_name: name } });
+        Modal.close(bd); EN.toast('Category added.', 'success');
+        // Refresh page to get updated categories
+        location.reload();
+      } catch (_) {}
+    });
+    bd.querySelector('#cat-list').addEventListener('click', async (e) => {
+      const d = e.target.closest('[data-del-cat]');
+      if (!d) return;
+      const ok = await Modal.confirm({ title: 'Delete category?', message: 'Items in this category will become uncategorized.', confirmText: 'Delete', danger: true });
+      if (!ok) return;
+      try {
+        await EN.api('/api/inventory/categories.php', { body: { action: 'delete', id: +d.dataset.delCat } });
+        d.closest('[data-cat-row]').remove();
+        EN.toast('Category deleted.', 'success');
+      } catch (_) {}
+    });
+  });
+
+  search.addEventListener('input', () => {
+    clearTimeout(window._dbi); window._dbi = setTimeout(() => { state.q = search.value.trim(); state.page = 1; load(); }, 300);
+  });
+  fCat.addEventListener('change', () => { state.category = fCat.value; state.page = 1; load(); });
+
+  load();
+})();

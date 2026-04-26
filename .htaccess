@@ -1,0 +1,20 @@
+Options -Indexes
+
+ErrorDocument 403 /403.php
+ErrorDocument 404 /404.php
+
+# Block direct access to config and logs
+<Files "config.json">
+    Require all denied
+</Files>
+
+<FilesMatch "\.(log|sql|md)$">
+    Require all denied
+</FilesMatch>
+
+# Block direct access to private folders
+RewriteEngine On
+RewriteRule ^(includes|logs|cron)(/|$) - [F,L]
+
+# Default character set
+AddDefaultCharset UTF-8

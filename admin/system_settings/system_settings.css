@@ -1,0 +1,10 @@
+/* System Settings — admin */
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.settings-grid .card:last-child { grid-column: 1 / -1; }
+@media (max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+
+.toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.toggle-row:last-child { border-bottom: none; }
