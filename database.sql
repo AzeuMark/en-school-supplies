@@ -14,6 +14,7 @@ USE `azeu_en_school_supplies`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id`               INT AUTO_INCREMENT PRIMARY KEY,
   `full_name`        VARCHAR(150) NOT NULL,
+  `username`         VARCHAR(50)  NOT NULL UNIQUE,
   `email`            VARCHAR(150) NOT NULL UNIQUE,
   `phone`            VARCHAR(20)  NOT NULL,
   `password`         TEXT         NOT NULL,
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_by`       INT NULL,
   `created_at`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_users_username` (`username`),
   KEY `idx_users_role` (`role`),
   KEY `idx_users_status` (`status`),
   CONSTRAINT `fk_users_created_by` FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE SET NULL

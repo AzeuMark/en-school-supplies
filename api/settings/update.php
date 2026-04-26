@@ -13,6 +13,35 @@ $raw = file_get_contents('php://input');
 $body = $raw ? (json_decode($raw, true) ?: []) : $_POST;
 csrf_check($body['csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
 
+$logoUrl = null;
+$logoFile = $_FILES['logo_file'] ?? null;
+if ($logoFile && ($logoFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+    if (($logoFile['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        json_response(['ok' => false, 'error' => 'Logo upload failed.'], 400);
+    }
+    if (($logoFile['size'] ?? 0) > 2 * 1024 * 1024) {
+        json_response(['ok' => false, 'error' => 'Logo must be 2 MB or smaller.'], 400);
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($logoFile['tmp_name']);
+    if ($mime !== 'image/png') {
+        json_response(['ok' => false, 'error' => 'Only PNG logos are allowed.'], 400);
+    }
+
+    $uploadDir = APP_ROOT . '/uploads/system';
+    if (!is_dir($uploadDir) && !@mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+        json_response(['ok' => false, 'error' => 'Unable to create logo upload folder.'], 500);
+    }
+
+    $targetRel = 'uploads/system/logo.png';
+    $targetAbs = APP_ROOT . '/' . $targetRel;
+    if (!move_uploaded_file($logoFile['tmp_name'], $targetAbs)) {
+        json_response(['ok' => false, 'error' => 'Could not save the logo.'], 500);
+    }
+    $logoUrl = url('/' . $targetRel);
+}
+
 // Allowed settings keys
 $allowed = [
     'store_name', 'store_phone', 'store_email', 'timezone',
@@ -36,5 +65,10 @@ foreach ($settings as $key => $value) {
     $updated++;
 }
 
+if ($logoUrl !== null) {
+    set_setting('logo_path', 'uploads/system/logo.png');
+    $updated++;
+}
+
 log_info('System settings updated', ['count' => $updated, 'by' => $_SESSION['user']['id']]);
-json_response(['ok' => true, 'message' => "Updated $updated settings."]);
+json_response(['ok' => true, 'message' => "Updated $updated settings.", 'logo_url' => $logoUrl]);

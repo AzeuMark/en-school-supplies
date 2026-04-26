@@ -33,6 +33,19 @@ function generate_claim_pin() {
     return str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
 }
 
+function normalize_username($username) {
+    return strtolower(trim((string)$username));
+}
+
+function valid_username($username) {
+    $username = normalize_username($username);
+    return $username !== '' && preg_match('/^[a-z][a-z0-9_]{2,49}$/', $username) === 1;
+}
+
+function normalize_login_identifier($identifier) {
+    return strtolower(trim((string)$identifier));
+}
+
 function navbar_country_flag_options() {
     return [
         'Asia' => [

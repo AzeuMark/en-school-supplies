@@ -51,8 +51,8 @@ $next = $_GET['next'] ?? '';
         <?= csrf_field() ?>
         <input type="hidden" name="next" value="<?= e($next) ?>">
         <div class="field">
-          <label for="email">Email</label>
-          <input class="input" id="email" name="email" type="email" required autocomplete="email" autofocus>
+          <label for="identifier">Username or Email</label>
+          <input class="input" id="identifier" name="identifier" type="text" required autocomplete="username" autofocus>
         </div>
         <div class="field">
           <label for="password">Password</label>

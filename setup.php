@@ -27,6 +27,14 @@ $messages = [];
 $hasError = false;
 $executed = false;
 
+if (!empty($_SESSION['setup_flash']) && is_array($_SESSION['setup_flash'])) {
+    $flash = $_SESSION['setup_flash'];
+    $messages = $flash['messages'] ?? [];
+    $hasError = !empty($flash['hasError']);
+    $executed = !empty($flash['executed']);
+    unset($_SESSION['setup_flash']);
+}
+
 function msg($text, $type = 'info')
 {
     global $messages;
@@ -37,34 +45,17 @@ function msg($text, $type = 'info')
 
 $defaultUsers = [
     'admin' => [
-        ['email' => 'admin@en.com', 'password' => 'admin123', 'full_name' => 'System Administrator', 'phone' => '09170000001', 'status' => 'active'],
+        ['username' => 'admin', 'email' => 'admin@en.com', 'password' => 'admin', 'full_name' => 'System Administrator', 'phone' => '09170000001', 'status' => 'active'],
     ],
-    'staff' => [
-        ['email' => 'staff1@en.com', 'password' => 'staff123', 'full_name' => 'Anna Cruz', 'phone' => '09173000001', 'status' => 'active'],
-        ['email' => 'staff2@en.com', 'password' => 'staff123', 'full_name' => 'Patricia Villanueva', 'phone' => '09173000002', 'status' => 'active'],
-    ],
-    'customer' => [
-        ['email' => 'maria@gmail.com',   'password' => 'cust1234', 'full_name' => 'Maria Santos',    'phone' => '09171000001', 'status' => 'active'],
-        ['email' => 'jose@gmail.com',    'password' => 'cust1234', 'full_name' => 'Jose Reyes',      'phone' => '09171000002', 'status' => 'active'],
-        ['email' => 'pending@gmail.com', 'password' => 'cust1234', 'full_name' => 'Roberto Garcia',  'phone' => '09174000001', 'status' => 'pending'],
-    ],
+    'staff' => [],
+    'customer' => [],
 ];
 
-$defaultCategories = ['Notebooks', 'Pens & Pencils', 'Bags', 'Art Supplies', 'Paper Products', 'Accessories'];
+$defaultCategories = ['Notebooks', 'Pens & Pencils'];
 
 $defaultInventory = [
     ['item_name' => 'Spiral Notebook',       'category' => 'Notebooks',      'stock_count' => 50,  'price' => 45.00, 'max_order_qty' => 10],
-    ['item_name' => 'Composition Notebook',   'category' => 'Notebooks',      'stock_count' => 40,  'price' => 35.00, 'max_order_qty' => 10],
     ['item_name' => 'Ballpen (Blue)',         'category' => 'Pens & Pencils', 'stock_count' => 200, 'price' => 12.00, 'max_order_qty' => 20],
-    ['item_name' => 'Pencil #2',             'category' => 'Pens & Pencils', 'stock_count' => 150, 'price' => 8.00,  'max_order_qty' => 20],
-    ['item_name' => 'Eraser',                'category' => 'Accessories',    'stock_count' => 100, 'price' => 5.00,  'max_order_qty' => 15],
-    ['item_name' => 'Ruler 12"',             'category' => 'Accessories',    'stock_count' => 80,  'price' => 15.00, 'max_order_qty' => 10],
-    ['item_name' => 'School Backpack',        'category' => 'Bags',           'stock_count' => 15,  'price' => 450.00,'max_order_qty' => 3],
-    ['item_name' => 'Crayons 24-pack',       'category' => 'Art Supplies',   'stock_count' => 60,  'price' => 85.00, 'max_order_qty' => 5],
-    ['item_name' => 'Watercolor Set',         'category' => 'Art Supplies',   'stock_count' => 30,  'price' => 120.00,'max_order_qty' => 5],
-    ['item_name' => 'Bond Paper (ream)',      'category' => 'Paper Products', 'stock_count' => 25,  'price' => 180.00,'max_order_qty' => 5],
-    ['item_name' => 'Folder (Long)',          'category' => 'Paper Products', 'stock_count' => 0,   'price' => 18.00, 'max_order_qty' => 20],
-    ['item_name' => 'Glue Stick',            'category' => 'Accessories',    'stock_count' => 90,  'price' => 25.00, 'max_order_qty' => 10],
 ];
 
 $defaultItemNames = ['Spiral Notebook', 'Composition Notebook', 'Ballpen', 'Pencil', 'Eraser', 'Ruler',
@@ -105,7 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
                 if (!is_array($accounts)) continue;
                 foreach ($accounts as $acc) {
                     if (empty($acc['email']) || empty($acc['full_name'])) continue;
+                    $username = trim($acc['username'] ?? '');
+                    if ($username === '') {
+                        $local = strstr(trim($acc['email']), '@', true);
+                        $username = strtolower(preg_replace('/[^a-z0-9_]+/i', '', $local !== false ? $local : trim($acc['email'])));
+                    }
                     $submittedUsers[] = [
+                        'username'  => $username,
                         'email'     => trim($acc['email']),
                         'password'  => trim($acc['password'] ?: 'password123'),
                         'full_name' => trim($acc['full_name']),
@@ -208,18 +205,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
         // 4. SEED CATEGORIES
         // ──────────────────────────────────────────────────────────────────────
         $categoriesToUse = !empty($submittedCategories) ? $submittedCategories : $defaultCategories;
-        // Ensure "Uncategorized" exists as a fallback
-        if (!in_array('Uncategorized', $categoriesToUse)) {
-            $categoriesToUse[] = 'Uncategorized';
-        }
         $catStmt = $pdo->prepare("INSERT INTO item_categories (category_name) VALUES (?)");
         $categoryMap = []; // name => id
         foreach ($categoriesToUse as $cname) {
             $catStmt->execute([$cname]);
             $categoryMap[$cname] = (int)$pdo->lastInsertId();
         }
-        $uncategorizedId = $categoryMap['Uncategorized'];
-        msg("Seeded " . count($categoriesToUse) . " categories (includes 'Uncategorized' fallback).", 'success');
+        msg("Seeded " . count($categoriesToUse) . " categories.", 'success');
 
         // ──────────────────────────────────────────────────────────────────────
         // 5. SEED DEFAULT ITEM NAMES
@@ -234,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
         // 6. SEED USER ACCOUNTS
         // ──────────────────────────────────────────────────────────────────────
         $userStmt = $pdo->prepare(
-            "INSERT INTO users (full_name, email, phone, password, role, status, theme_preference) VALUES (?, ?, ?, ?, ?, ?, 'auto')"
+            "INSERT INTO users (full_name, username, email, phone, password, role, status, theme_preference) VALUES (?, ?, ?, ?, ?, ?, ?, 'auto')"
         );
 
         $usersToSeed = !empty($submittedUsers) ? $submittedUsers : [];
@@ -253,6 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
             $pwd = aes_encrypt($u['password']);
             $userStmt->execute([
                 $u['full_name'],
+                $u['username'],
                 $u['email'],
                 $u['phone'],
                 $pwd,
@@ -262,6 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
             $userId = (int)$pdo->lastInsertId();
             $usersByRole[$u['role']][] = [
                 'id'       => $userId,
+                'username' => $u['username'],
                 'email'    => $u['email'],
                 'status'   => $u['status'],
             ];
@@ -279,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
         );
         $inventoryIds = [];
         foreach ($inventoryToSeed as $item) {
-            $catId = $categoryMap[$item['category']] ?? $uncategorizedId;
+            $catId = $categoryMap[$item['category']] ?? null;
             $invStmt->execute([
                 $item['item_name'],
                 $catId,
@@ -418,11 +412,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
         }
         msg("Created uploads/ and logs/ folders.", 'success');
 
-        // ──────────────────────────────────────────────────────────────────────
-        // DONE
-        // ──────────────────────────────────────────────────────────────────────
-        msg("✅  Database setup complete! You may now log in.", 'success');
-
     } catch (PDOException $e) {
         $hasError = true;
         msg("DATABASE ERROR: " . $e->getMessage(), 'error');
@@ -430,6 +419,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
         $hasError = true;
         msg("ERROR: " . $e->getMessage(), 'error');
     }
+
+    $_SESSION['setup_flash'] = [
+        'messages' => $messages,
+        'hasError' => $hasError,
+        'executed' => $executed,
+    ];
+    redirect(url('/setup.php'));
 }
 
 // ── Role display config ──────────────────────────────────────────────────────
@@ -440,87 +436,106 @@ $roleConfig = [
 ];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Setup — E&amp;N School Supplies</title>
+    <link rel="stylesheet" href="<?= htmlspecialchars(url('/assets/css/global.css')) ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(url('/assets/css/components.css')) ?>">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: #0D0D1A;
-            color: #E0E0F0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(129, 199, 132, 0.22), transparent 28%),
+                radial-gradient(circle at top right, rgba(76, 175, 80, 0.14), transparent 24%),
+                var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 30px 16px 60px;
+            padding: 20px 16px 48px;
         }
 
-        .container { max-width: 960px; margin: 0 auto; }
+        .container { max-width: 1480px; margin: 0 auto; }
 
         /* ── Header ── */
-        .header { text-align: center; margin-bottom: 32px; }
-        .header .logo { font-size: 52px; }
-        .header h1 { font-size: 1.7em; margin: 8px 0 4px; }
-        .header .sub { color: #8888AA; font-size: 0.95em; }
+        .header { text-align: center; margin-bottom: 18px; }
+        .header .logo { font-size: 42px; }
+        .header h1 { font-size: 1.45em; margin: 6px 0 4px; }
+        .header .sub { color: var(--text-muted); font-size: 0.88em; }
 
         /* ── Warning ── */
         .warning-box {
-            background: rgba(239, 83, 80, 0.1);
-            border: 1px solid rgba(239, 83, 80, 0.3);
-            border-left: 4px solid #EF5350;
-            border-radius: 12px;
-            padding: 18px 22px;
-            margin-bottom: 28px;
+            background: rgba(46, 125, 50, 0.08);
+            border: 1px solid rgba(46, 125, 50, 0.18);
+            border-left: 4px solid var(--primary);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
             display: flex;
-            gap: 14px;
+            gap: 12px;
             align-items: flex-start;
+            box-shadow: var(--shadow-sm);
         }
-        .warning-box .wi { font-size: 28px; flex-shrink: 0; }
-        .warning-box p { color: #F0A0A0; line-height: 1.5; font-size: 0.92em; }
-        .warning-box strong { color: #EF5350; }
+        .warning-box .wi { font-size: 24px; flex-shrink: 0; }
+        .warning-box p { color: var(--text-muted); line-height: 1.45; font-size: 0.88em; margin: 0; }
+        .warning-box strong { color: var(--primary); }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        .setup-col {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+        .setup-col-main, .setup-col-side { align-self: start; }
 
         /* ── Sections ── */
         .section {
-            background: rgba(25, 25, 45, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid #2A2A42;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            margin-bottom: 24px;
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
         .section-header {
-            background: rgba(30, 30, 55, 0.8);
-            padding: 16px 22px;
+            background: rgba(46, 125, 50, 0.04);
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #2A2A42;
+            border-bottom: 1px solid var(--border);
             cursor: pointer;
             user-select: none;
             transition: background 0.2s;
         }
-        .section-header:hover { background: rgba(40, 40, 65, 0.8); }
-        .section-header .si { font-size: 24px; }
-        .section-header h2 { font-size: 1.05em; font-weight: 600; flex: 1; }
+        .section-header:hover { background: rgba(46, 125, 50, 0.08); }
+        .section-header .si { font-size: 20px; }
+        .section-header h2 { font-size: 0.96em; font-weight: 700; flex: 1; }
         .section-header .badge {
-            background: rgba(46,125,50,0.15);
-            color: #81C784;
+            background: rgba(46,125,50,0.12);
+            color: var(--primary);
             padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.78em;
+            font-size: 0.72em;
             font-weight: 600;
         }
-        .section-header .chevron { color: #666; transition: transform 0.3s; font-size: 20px; }
+        .section-header .chevron { color: var(--text-muted); transition: transform 0.3s; font-size: 18px; }
         .section-header.collapsed .chevron { transform: rotate(-90deg); }
-        .section-body { padding: 20px 22px; }
+        .section-body { padding: 14px 16px 16px; }
         .section-body.collapsed { display: none; }
 
         /* ── Role Groups ── */
         .role-group {
-            border: 1px solid #2A2A42;
+            border: 1px solid var(--border);
             border-radius: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             overflow: hidden;
         }
         .role-group:last-child { margin-bottom: 0; }
@@ -533,28 +548,28 @@ $roleConfig = [
             user-select: none;
             transition: background 0.2s;
         }
-        .role-header:hover { background: rgba(255,255,255,0.03); }
-        .role-header .ri { font-size: 22px; }
-        .role-header .role-label { font-weight: 600; font-size: 0.95em; flex: 1; }
+        .role-header:hover { background: rgba(46,125,50,0.05); }
+        .role-header .ri { font-size: 20px; }
+        .role-header .role-label { font-weight: 700; font-size: 0.88em; flex: 1; }
         .role-header .count-badge {
-            background: rgba(255,255,255,0.08);
+            background: rgba(46,125,50,0.12);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.75em;
-            color: #aaa;
+            color: var(--primary);
         }
-        .role-body { padding: 0 18px 16px; }
+        .role-body { padding: 0 14px 14px; }
 
         /* ── User Card ── */
         .user-card {
-            background: rgba(20, 20, 40, 0.6);
-            border: 1px solid #222240;
+            background: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 14px 16px;
+            padding: 12px 12px 10px;
             margin-bottom: 10px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
         }
         .user-card:last-child { margin-bottom: 0; }
         .user-card .full-width { grid-column: 1 / -1; }
@@ -564,48 +579,48 @@ $roleConfig = [
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
-        .user-card-header span { font-size: 0.8em; color: #888; }
+        .user-card-header span { font-size: 0.78em; color: var(--text-muted); }
         .btn-remove {
-            background: rgba(239,83,80,0.1);
-            border: 1px solid rgba(239,83,80,0.3);
-            color: #EF5350;
+            background: rgba(211,47,47,0.08);
+            border: 1px solid rgba(211,47,47,0.24);
+            color: var(--danger);
             border-radius: 6px;
-            padding: 3px 10px;
+            padding: 3px 8px;
             font-size: 0.75em;
             cursor: pointer;
             font-family: inherit;
             transition: all 0.2s;
         }
-        .btn-remove:hover { background: rgba(239,83,80,0.25); }
+        .btn-remove:hover { background: rgba(211,47,47,0.14); }
 
         /* ── Inputs ── */
         .field { display: flex; flex-direction: column; gap: 4px; }
         .field label {
-            font-size: 0.72em;
+            font-size: 0.68em;
             font-weight: 600;
-            color: #7777AA;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .field input, .field select {
-            background: rgba(15, 15, 30, 0.8);
-            border: 1px solid #2A2A42;
-            color: #E0E0F0;
-            padding: 9px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
             border-radius: 8px;
-            font-size: 0.88em;
+            font-size: 0.84em;
             font-family: inherit;
             transition: border-color 0.2s;
             width: 100%;
         }
         .field input:focus, .field select:focus {
             outline: none;
-            border-color: #2e7d32;
-            box-shadow: 0 0 0 2px rgba(46,125,50,0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46,125,50,0.12);
         }
-        .field input::placeholder { color: #555; }
+        .field input::placeholder { color: var(--text-muted); }
 
         /* ── Inventory / Category Table ── */
         .inv-table {
@@ -614,33 +629,33 @@ $roleConfig = [
         }
         .inv-table th {
             text-align: left;
-            font-size: 0.72em;
+            font-size: 0.68em;
             font-weight: 600;
-            color: #7777AA;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 8px 10px;
-            border-bottom: 1px solid #2A2A42;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
         }
         .inv-table td {
-            padding: 6px 10px;
-            border-bottom: 1px solid rgba(42,42,66,0.5);
+            padding: 5px 8px;
+            border-bottom: 1px solid rgba(200,230,201,0.7);
             vertical-align: middle;
         }
         .inv-table input, .inv-table select {
-            background: rgba(15, 15, 30, 0.8);
-            border: 1px solid #2A2A42;
-            color: #E0E0F0;
-            padding: 8px 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 9px;
             border-radius: 7px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             font-family: inherit;
             width: 100%;
             transition: border-color 0.2s;
         }
         .inv-table input:focus, .inv-table select:focus {
             outline: none;
-            border-color: #2e7d32;
+            border-color: var(--primary);
         }
         .inv-table .btn-remove { padding: 5px 10px; }
         .inv-table tr:last-child td { border-bottom: none; }
@@ -648,22 +663,22 @@ $roleConfig = [
         /* ── Toggle Switches ── */
         .toggle-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
             gap: 10px;
         }
         .toggle-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 16px;
-            background: rgba(20,20,40,0.6);
-            border: 1px solid #222240;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .toggle-item:hover { border-color: #2e7d32; background: rgba(25,25,50,0.8); }
-        .toggle-item.active { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
+        .toggle-item:hover { border-color: var(--primary); background: rgba(46,125,50,0.05); }
+        .toggle-item.active { border-color: var(--primary); background: rgba(46,125,50,0.08); }
 
         .switch {
             position: relative;
@@ -675,7 +690,7 @@ $roleConfig = [
         .switch .slider {
             position: absolute;
             inset: 0;
-            background: #2A2A42;
+            background: var(--border);
             border-radius: 24px;
             transition: 0.3s;
             cursor: pointer;
@@ -687,7 +702,7 @@ $roleConfig = [
             width: 18px;
             left: 3px;
             bottom: 3px;
-            background: #666;
+            background: var(--text-muted);
             border-radius: 50%;
             transition: 0.3s;
         }
@@ -696,13 +711,13 @@ $roleConfig = [
             transform: translateX(18px);
             background: #fff;
         }
-        .toggle-label { font-size: 0.9em; font-weight: 500; }
+        .toggle-label { font-size: 0.84em; font-weight: 600; }
 
         /* ── Settings Grid ── */
         .settings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
         }
 
         /* ── Add Buttons ── */
@@ -710,19 +725,19 @@ $roleConfig = [
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(46,125,50,0.1);
-            border: 1px dashed rgba(46,125,50,0.3);
-            color: #66BB6A;
-            padding: 10px 18px;
+            background: rgba(46,125,50,0.08);
+            border: 1px dashed rgba(46,125,50,0.25);
+            color: var(--primary);
+            padding: 8px 14px;
             border-radius: 8px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             font-weight: 600;
             cursor: pointer;
             font-family: inherit;
             transition: all 0.2s;
-            margin-top: 10px;
+            margin-top: 8px;
         }
-        .btn-add:hover { background: rgba(46,125,50,0.2); border-color: #2e7d32; }
+        .btn-add:hover { background: rgba(46,125,50,0.14); border-color: var(--primary); }
 
         /* ── Submit Button ── */
         .btn-submit-wrap { margin: 32px 0 20px; }
@@ -732,10 +747,10 @@ $roleConfig = [
             justify-content: center;
             gap: 10px;
             width: 100%;
-            padding: 18px;
+            padding: 14px 16px;
             background: linear-gradient(135deg, #1B5E20, #2E7D32);
             color: #fff;
-            font-size: 1.15em;
+            font-size: 0.95em;
             font-weight: 700;
             border: none;
             border-radius: 14px;
@@ -761,12 +776,12 @@ $roleConfig = [
         }
 
         /* ── Feedback ── */
-        .feedback { margin-top: 28px; }
+        .feedback { margin-top: 0; }
         .msg {
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 8px;
             margin-bottom: 6px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             line-height: 1.4;
             display: flex;
             align-items: center;
@@ -782,11 +797,14 @@ $roleConfig = [
         .msg-error   { background: rgba(239,83,80,0.12); border: 1px solid rgba(239,83,80,0.25); color: #EF9A9A; }
         .msg-error .mi { color: #EF5350; }
 
-        .bottom-link { text-align: center; margin-top: 24px; }
-        .bottom-link a { color: #66BB6A; text-decoration: none; font-size: 0.93em; }
+        .bottom-link { text-align: center; margin-top: 18px; }
+        .bottom-link a { color: var(--primary); text-decoration: none; font-size: 0.88em; }
         .bottom-link a:hover { text-decoration: underline; }
 
         /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .setup-grid { grid-template-columns: 1fr; }
+        }
         @media (max-width: 600px) {
             .user-card { grid-template-columns: 1fr; }
             .toggle-grid { grid-template-columns: 1fr; }
@@ -811,7 +829,31 @@ $roleConfig = [
         <p><strong>Warning:</strong> This will <strong>completely delete</strong> the existing database and recreate it with the configuration below. <strong>All current data will be permanently lost.</strong> Use only for testing.</p>
     </div>
 
+    <?php if (!empty($messages)): ?>
+    <div class="section" style="margin-top:0;">
+        <div class="section-header" style="cursor:default;">
+            <span class="si"><?= $hasError ? '❌' : '💻' ?></span>
+            <h2><?= $hasError ? 'Completed with Errors' : 'Execution Log' ?></h2>
+            <span class="badge"><?= count($messages) ?> entries</span>
+        </div>
+        <div class="section-body feedback">
+            <?php foreach ($messages as $m): ?>
+                <?php
+                    $iconMap = ['success' => '✅', 'info' => 'ℹ️', 'warning' => '⚠️', 'error' => '❌'];
+                    $icon = $iconMap[$m['type']] ?? 'ℹ️';
+                ?>
+                <div class="msg msg-<?= $m['type'] ?>">
+                    <span class="mi"><?= $icon ?></span>
+                    <?= htmlspecialchars($m['text']) ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <form method="POST" id="setupForm">
+    <div class="setup-grid">
+        <div class="setup-col setup-col-main">
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <!-- SECTION 1: USER ACCOUNTS                                          -->
@@ -840,6 +882,10 @@ $roleConfig = [
                             <div class="user-card-header">
                                 <span><?= $cfg['label'] ?> #<?= $idx + 1 ?></span>
                                 <button type="button" class="btn-remove" onclick="removeUserCard(this)">✕ Remove</button>
+                            </div>
+                            <div class="field">
+                                <label>Username</label>
+                                <input type="text" name="users[<?= $role ?>][<?= $idx ?>][username]" value="<?= htmlspecialchars($u['username']) ?>" placeholder="username" required>
                             </div>
                             <div class="field">
                                 <label>Email</label>
@@ -906,6 +952,9 @@ $roleConfig = [
             <button type="button" class="btn-add" onclick="addCatRow()">+ Add Category</button>
         </div>
     </div>
+
+        </div>
+        <div class="setup-col setup-col-side">
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <!-- SECTION 3: INVENTORY                                              -->
@@ -1016,6 +1065,9 @@ $roleConfig = [
         </div>
     </div>
 
+        </div>
+    </div>
+
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <!-- SUBMIT                                                            -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
@@ -1029,30 +1081,6 @@ $roleConfig = [
 
     </form>
 
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- FEEDBACK LOG                                                      -->
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <?php if (!empty($messages)): ?>
-    <div class="section">
-        <div class="section-header" style="cursor:default;">
-            <span class="si"><?= $hasError ? '❌' : '💻' ?></span>
-            <h2><?= $hasError ? 'Completed with Errors' : 'Execution Log' ?></h2>
-            <span class="badge"><?= count($messages) ?> entries</span>
-        </div>
-        <div class="section-body feedback">
-            <?php foreach ($messages as $m): ?>
-                <?php
-                    $iconMap = ['success' => '✅', 'info' => 'ℹ️', 'warning' => '⚠️', 'error' => '❌'];
-                    $icon = $iconMap[$m['type']] ?? 'ℹ️';
-                ?>
-                <div class="msg msg-<?= $m['type'] ?>">
-                    <span class="mi"><?= $icon ?></span>
-                    <?= htmlspecialchars($m['text']) ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
     <?php if (!$hasError): ?>
     <form method="POST">
         <button type="submit" name="create_db" class="btn-submit reset"
@@ -1061,7 +1089,6 @@ $roleConfig = [
             QUICK RESET (Default Values)
         </button>
     </form>
-    <?php endif; ?>
     <?php endif; ?>
 
     <div class="bottom-link">
@@ -1102,6 +1129,10 @@ function addUserCard(role, roleLabel) {
         <div class="user-card-header">
             <span>${roleLabel} (new)</span>
             <button type="button" class="btn-remove" onclick="removeUserCard(this)">✕ Remove</button>
+        </div>
+        <div class="field">
+            <label>Username</label>
+            <input type="text" name="users[${role}][${idx}][username]" placeholder="username" required>
         </div>
         <div class="field">
             <label>Email</label>

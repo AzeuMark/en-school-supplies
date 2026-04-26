@@ -14,6 +14,7 @@ $s = [
     'store_name'              => get_setting('store_name', config('system.store_name')),
     'store_phone'             => get_setting('store_phone', config('system.store_phone')),
     'store_email'             => get_setting('store_email', config('system.store_email')),
+    'logo_path'               => get_setting('logo_path', config('system.logo_path')),
     'timezone'                => get_setting('timezone', config('system.timezone')),
   'navbar_country_flag'     => get_setting('navbar_country_flag', 'PH'),
     'auto_logout_hours'       => get_setting('auto_logout_hours', (string)config('system.auto_logout_hours')),
@@ -24,20 +25,39 @@ $s = [
     'disable_no_login_orders' => get_setting('disable_no_login_orders', '0'),
     'online_payment'          => get_setting('online_payment', '0'),
 ];
+
+$logo_display_path = '/' . ltrim($s['logo_path'], '/');
+$logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_display_path) : null;
 ?>
 <div class="page-header">
   <h1>System Settings</h1>
 </div>
 
-<form id="settings-form">
+<form id="settings-form" enctype="multipart/form-data">
   <div class="settings-grid">
     <!-- Store info -->
     <div class="card">
       <h3 class="card-title mb-4">Store Information</h3>
-      <div class="field"><label>Store Name</label><input class="input" name="store_name" value="<?= e($s['store_name']) ?>" required maxlength="100"></div>
+      <div class="field">
+        <label>Website Logo</label>
+        <div class="logo-upload">
+          <div class="logo-preview">
+            <?php if ($logo_display_url): ?>
+              <img src="<?= e($logo_display_url) ?>" alt="Website logo">
+            <?php else: ?>
+              <div class="logo-preview-empty">No logo uploaded</div>
+            <?php endif; ?>
+          </div>
+          <div class="logo-upload-meta">
+            <input class="input" type="file" name="logo_file" accept="image/png,.png">
+            <div class="field-help">PNG only, max 2 MB. This logo appears in the navbar and sidebar.</div>
+          </div>
+        </div>
+      </div>
+      <div class="field"><label>Store Name</label><input class="input" name="store_name" value="<?= e($s['store_name']) ?>" required maxlength="100"><div class="field-help">Shown in the navbar, sidebar, login page, and receipts.</div></div>
       <div class="field"><label>Phone</label><input class="input" name="store_phone" value="<?= e($s['store_phone']) ?>" maxlength="20"></div>
       <div class="field"><label>Email</label><input class="input" name="store_email" type="email" value="<?= e($s['store_email']) ?>" maxlength="100"></div>
-      <div class="field"><label>Timezone</label><input class="input" name="timezone" value="<?= e($s['timezone']) ?>" maxlength="50"></div>
+      <div class="field"><label>Timezone</label><input class="input" name="timezone" value="<?= e($s['timezone']) ?>" maxlength="50"><div class="field-help">Controls the date and time shown throughout the system.</div></div>
       <div class="field">
         <label>Navbar Country Flag</label>
         <select class="select-native" name="navbar_country_flag">
@@ -65,9 +85,9 @@ $s = [
         </select>
         <div class="field-help">When offline, only admins can log in. Maintenance allows staff too.</div>
       </div>
-      <div class="field"><label>Auto-Logout (hours)</label><input class="input" name="auto_logout_hours" type="number" min="1" max="72" value="<?= e($s['auto_logout_hours']) ?>"></div>
-      <div class="field"><label>Low Stock Threshold (%)</label><input class="input" name="low_stock_percent" type="number" min="1" max="100" value="<?= e($s['low_stock_percent']) ?>"></div>
-      <div class="field"><label>Kiosk Idle Timeout (seconds)</label><input class="input" name="kiosk_idle_seconds" type="number" min="30" max="600" value="<?= e($s['kiosk_idle_seconds']) ?>"></div>
+      <div class="field"><label>Auto-Logout (hours)</label><input class="input" name="auto_logout_hours" type="number" min="1" max="72" value="<?= e($s['auto_logout_hours']) ?>"><div class="field-help">Logs out inactive staff after this many hours for security.</div></div>
+      <div class="field"><label>Low Stock Threshold (%)</label><input class="input" name="low_stock_percent" type="number" min="1" max="100" value="<?= e($s['low_stock_percent']) ?>"><div class="field-help">Items at or below this percentage are marked as low stock.</div></div>
+      <div class="field"><label>Kiosk Idle Timeout (seconds)</label><input class="input" name="kiosk_idle_seconds" type="number" min="30" max="600" value="<?= e($s['kiosk_idle_seconds']) ?>"><div class="field-help">Resets the kiosk screen after this many seconds of inactivity.</div></div>
     </div>
 
     <!-- Toggles -->
@@ -82,7 +102,7 @@ $s = [
         <label class="toggle"><input type="checkbox" name="disable_no_login_orders" value="1" <?= $s['disable_no_login_orders']==='1'?'checked':'' ?>><span class="slider"></span></label>
       </div>
       <div class="toggle-row">
-        <div><strong>Online Payment</strong><div class="field-help">Enable online payment option (placeholder).</div></div>
+        <div><strong>Online Payment</strong><div class="field-help">Show the online payment option during checkout.</div></div>
         <label class="toggle"><input type="checkbox" name="online_payment" value="1" <?= $s['online_payment']==='1'?'checked':'' ?>><span class="slider"></span></label>
       </div>
     </div>

@@ -21,11 +21,12 @@
   function render(users) {
     if (!users.length) { tbl.innerHTML = '<div class="empty-state"><div class="es-icon">👥</div><div class="es-title">No users found</div></div>'; return; }
     tbl.innerHTML = `<div class="table-wrap"><table class="table">
-      <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         ${users.map(u => `
           <tr>
             <td>#${u.id}</td>
+            <td>${EN.escapeHtml(u.username || '')}</td>
             <td>${EN.escapeHtml(u.full_name)}</td>
             <td>${EN.escapeHtml(u.email)}</td>
             <td>${EN.escapeHtml(u.phone)}</td>
@@ -100,6 +101,7 @@
 
   function userFormHtml(u = {}, edit = false) {
     return `
+      <div class="field"><label>Username</label><input class="input" data-f="username" required maxlength="50" value="${EN.escapeHtml(u.username||'')}"><div class="field-help">3-50 characters. Letters, numbers, and underscores only.</div></div>
       <div class="field"><label>Full Name</label><input class="input" data-f="full_name" required maxlength="150" value="${EN.escapeHtml(u.full_name||'')}"></div>
       <div class="field"><label>Email</label><input class="input" data-f="email" type="email" required maxlength="150" value="${EN.escapeHtml(u.email||'')}"></div>
       <div class="field"><label>Phone</label><input class="input" data-f="phone" required maxlength="20" value="${EN.escapeHtml(u.phone||'')}"></div>

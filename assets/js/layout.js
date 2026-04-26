@@ -4,22 +4,36 @@
   const shell = document.querySelector('.app-shell');
 
   // Sidebar collapse / mobile open
-  const COLLAPSE_KEY = 'sidebarCollapsed';
-  if (shell && localStorage.getItem(COLLAPSE_KEY) === '1') shell.classList.add('sidebar-collapsed');
+  const DRAWER_KEY = 'sidebarDrawerOpen';
+  if (shell && localStorage.getItem(DRAWER_KEY) === '1') shell.classList.add('sidebar-open');
 
   document.addEventListener('click', function (e) {
     const ham = e.target.closest('[data-sidebar-toggle]');
+    const backdrop = e.target.closest('[data-sidebar-backdrop]');
+    const navLink = e.target.closest('.sidebar-link');
+
+    if (backdrop && shell) {
+      shell.classList.remove('sidebar-open');
+      localStorage.setItem(DRAWER_KEY, '0');
+    }
+
     if (ham && shell) {
-      if (window.matchMedia('(max-width: 768px)').matches) {
-        shell.classList.toggle('sidebar-open');
-      } else {
-        shell.classList.toggle('sidebar-collapsed');
-        localStorage.setItem(COLLAPSE_KEY, shell.classList.contains('sidebar-collapsed') ? '1' : '0');
-      }
+      shell.classList.toggle('sidebar-open');
+      localStorage.setItem(DRAWER_KEY, shell.classList.contains('sidebar-open') ? '1' : '0');
+      ham.setAttribute('aria-expanded', shell.classList.contains('sidebar-open') ? 'true' : 'false');
+    }
+    if (navLink && shell) {
+      shell.classList.remove('sidebar-open');
+      localStorage.setItem(DRAWER_KEY, '0');
+      const toggle = document.querySelector('[data-sidebar-toggle]');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
     }
     // close mobile sidebar when clicking backdrop area
     if (shell && shell.classList.contains('sidebar-open') && !e.target.closest('.app-sidebar') && !e.target.closest('[data-sidebar-toggle]')) {
       shell.classList.remove('sidebar-open');
+      localStorage.setItem(DRAWER_KEY, '0');
+      const toggle = document.querySelector('[data-sidebar-toggle]');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
     }
     // Profile dropdown
     const chip = e.target.closest('[data-profile-chip]');

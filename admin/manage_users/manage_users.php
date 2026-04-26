@@ -15,7 +15,7 @@ include __DIR__ . '/../../includes/layout_header.php';
 </div>
 
 <div class="toolbar">
-  <div class="search-box"><input class="input" id="search" placeholder="Search by name, email, or phone..."></div>
+  <div class="search-box"><input class="input" id="search" placeholder="Search by username, name, email, or phone..."></div>
   <select class="select-native" id="filter-role" data-custom-select>
     <option value="">All Roles</option>
     <option value="admin">Admin</option>

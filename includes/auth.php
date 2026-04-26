@@ -41,6 +41,7 @@ function login_user(array $user) {
     $_SESSION['user'] = [
         'id'        => (int)$user['id'],
         'full_name' => $user['full_name'],
+        'username'  => $user['username'] ?? null,
         'email'     => $user['email'],
         'role'      => $user['role'],
         'avatar'    => $user['profile_image'] ?? null,

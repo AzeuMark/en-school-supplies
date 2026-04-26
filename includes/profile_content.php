@@ -8,7 +8,7 @@ require_once __DIR__ . '/helpers.php';
 
 global $pdo;
 $uid = (int)$_SESSION['user']['id'];
-$stmt = $pdo->prepare("SELECT id, full_name, email, phone, profile_image, theme_preference, role FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, full_name, username, email, phone, profile_image, theme_preference, role FROM users WHERE id = ?");
 $stmt->execute([$uid]);
 $me = $stmt->fetch();
 
@@ -46,6 +46,11 @@ $initials = strtoupper(mb_substr($me['full_name'] ?? '?', 0, 1));
   <div class="card">
     <h3 class="card-title mb-4">Account Details</h3>
     <form id="profile-form">
+      <div class="field">
+        <label for="username">Username</label>
+        <input class="input" id="username" name="username" required maxlength="50" value="<?= e($me['username']) ?>">
+        <div class="field-help">Use 3-50 characters: letters, numbers, and underscores only.</div>
+      </div>
       <div class="field">
         <label for="full_name">Full Name</label>
         <input class="input" id="full_name" name="full_name" required maxlength="150" value="<?= e($me['full_name']) ?>">
@@ -106,6 +111,7 @@ $initials = strtoupper(mb_substr($me['full_name'] ?? '?', 0, 1));
     e.preventDefault();
     const f = e.target;
     const body = {
+      username: f.username.value,
       full_name: f.full_name.value,
       email: f.email.value,
       phone: f.phone.value,

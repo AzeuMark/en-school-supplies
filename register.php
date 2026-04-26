@@ -49,6 +49,11 @@ $old = flash_pop('flash_old') ?? [];
       <form action="<?= e(url('/api/auth/register.php')) ?>" method="post" data-prg-guard>
         <?= csrf_field() ?>
         <div class="field">
+          <label for="username">Username</label>
+          <input class="input" id="username" name="username" type="text" required maxlength="50" value="<?= e($old['username'] ?? '') ?>" autocomplete="username">
+          <div class="field-help">3-50 characters. Letters, numbers, and underscores only.</div>
+        </div>
+        <div class="field">
           <label for="full_name">Full Name</label>
           <input class="input" id="full_name" name="full_name" type="text" required maxlength="150" value="<?= e($old['full_name'] ?? '') ?>">
         </div>

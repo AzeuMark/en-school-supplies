@@ -30,6 +30,7 @@ if (isset($body['theme_preference']) && count($body) <= 2) {
 
 // Full profile update
 $full_name = sanitize($body['full_name'] ?? '');
+$username  = normalize_username($body['username'] ?? '');
 $email     = strtolower(trim($body['email'] ?? ''));
 $phone     = sanitize($body['phone'] ?? '');
 $cur_pass  = (string)($body['current_password'] ?? '');
@@ -38,6 +39,7 @@ $new_pass2 = (string)($body['new_password2'] ?? '');
 
 $errors = [];
 if ($full_name === '' || mb_strlen($full_name) > 150) $errors[] = 'Full name is required.';
+if (!valid_username($username))                     $errors[] = 'Username must be 3-50 characters and use letters, numbers, or underscores.';
 if (!valid_email($email))                              $errors[] = 'Valid email required.';
 if ($phone === '')                                     $errors[] = 'Phone is required.';
 
@@ -45,6 +47,10 @@ if ($phone === '')                                     $errors[] = 'Phone is req
 $stmt = $pdo->prepare("SELECT 1 FROM users WHERE email = ? AND id <> ? LIMIT 1");
 $stmt->execute([$email, $uid]);
 if ($stmt->fetch()) $errors[] = 'That email is already in use.';
+
+$stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ? AND id <> ? LIMIT 1");
+$stmt->execute([$username, $uid]);
+if ($stmt->fetch()) $errors[] = 'That username is already in use.';
 
 // Password change validation
 $change_pass = $new_pass !== '' || $new_pass2 !== '' || $cur_pass !== '';
@@ -61,14 +67,15 @@ if ($change_pass) {
 if ($errors) json_response(['ok' => false, 'error' => implode(' ', $errors)], 400);
 
 if ($change_pass) {
-    $stmt = $pdo->prepare("UPDATE users SET full_name=?, email=?, phone=?, password=? WHERE id=?");
-    $stmt->execute([$full_name, $email, $phone, aes_encrypt($new_pass), $uid]);
+    $stmt = $pdo->prepare("UPDATE users SET full_name=?, username=?, email=?, phone=?, password=? WHERE id=?");
+    $stmt->execute([$full_name, $username, $email, $phone, aes_encrypt($new_pass), $uid]);
 } else {
-    $stmt = $pdo->prepare("UPDATE users SET full_name=?, email=?, phone=? WHERE id=?");
-    $stmt->execute([$full_name, $email, $phone, $uid]);
+    $stmt = $pdo->prepare("UPDATE users SET full_name=?, username=?, email=?, phone=? WHERE id=?");
+    $stmt->execute([$full_name, $username, $email, $phone, $uid]);
 }
 
 $_SESSION['user']['full_name'] = $full_name;
+$_SESSION['user']['username']  = $username;
 $_SESSION['user']['email']     = $email;
 
 log_info('Profile updated', ['user_id' => $uid, 'pass_changed' => $change_pass]);

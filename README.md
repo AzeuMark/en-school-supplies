@@ -26,7 +26,7 @@ A vanilla PHP/MySQL/JavaScript/CSS school supplies ordering and management syste
    - Create required upload directories
 
 4. **Login** with the default admin credentials:
-   - **Email:** `admin@en.com`
+   - **Username / Email:** `admin@en.com`
    - **Password:** `admin123`
 
 5. **Delete or protect `setup.php`** after initial setup.
@@ -110,10 +110,14 @@ A vanilla PHP/MySQL/JavaScript/CSS school supplies ordering and management syste
 - **4-digit Claim PIN** — generated per order, shown on receipt, required for staff to mark as claimed
 - **Stock Deduction** — stock deducted on order placement, restored on cancellation
 - **Dark/Light Theme** — auto (OS preference), manual toggle, force dark mode (admin setting)
+- **Username or Email Login** — users can sign in using either identifier
+- **Navbar Country Flag** — configurable country flag shown beside the clock using the included flag image pack
+- **Website Logo Upload** — admin can upload a PNG logo in System Settings and it appears in the navbar
+- **Role-Aware Navbar** — profile access is available from the navbar dropdown, not the sidebar
 - **CSRF Protection** — token per session, validated on all mutations
 - **AES-256-CBC Encryption** — for password storage
 - **Dual Logging** — file + database
-- **Rate Limiting** — login attempts throttled per email
+- **Rate Limiting** — login attempts throttled per login identifier
 - **Kiosk Idle Timeout** — auto-clears cart after configurable inactivity period
 - **Server-rendered Analytics** — revenue charts, top items, category breakdown
 - **Responsive Design** — mobile-friendly across all pages
@@ -139,6 +143,7 @@ php.exe "D:\path\to\cron\auto_logout.php"
 - **Delete `setup.php`** after initial setup
 - **Protect `config.json`** — `.htaccess` blocks direct access
 - **HTTPS** is recommended for production
+- **Upload Limits** — the admin logo upload accepts PNG only and limits files to 2 MB
 
 ## License
 

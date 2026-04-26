@@ -32,9 +32,9 @@ if (in_array($filter_status, ['active', 'pending', 'flagged'], true)) {
     $params[] = $filter_status;
 }
 if ($q !== '') {
-    $where[]  = '(u.full_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
+    $where[]  = '(u.full_name LIKE ? OR u.username LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
     $like = '%' . $q . '%';
-    $params[] = $like; $params[] = $like; $params[] = $like;
+    $params[] = $like; $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
 $sql_where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -46,7 +46,7 @@ $total_pages = max(1, (int)ceil($total / $per_page));
 $page = min($page, $total_pages);
 $offset = ($page - 1) * $per_page;
 
-$sql = "SELECT u.id, u.full_name, u.email, u.phone, u.role, u.status, u.flag_reason, u.created_at
+$sql = "SELECT u.id, u.full_name, u.username, u.email, u.phone, u.role, u.status, u.flag_reason, u.created_at
         FROM users u
         $sql_where
         ORDER BY u.created_at DESC
