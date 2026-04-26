@@ -206,6 +206,7 @@
   }
 
   function showReceipt(data) {
+    const pinDisplay = data.claim_pin_display || data.claim_pin || '----';
     const itemsRows = (data.items || []).map(i =>
       `<tr><td>${escapeHtml(i.name)}</td><td class="num">${i.qty}</td><td class="num">${formatPrice(i.unit_price)}</td><td class="num">${formatPrice(i.subtotal)}</td></tr>`
     ).join('');
@@ -216,7 +217,7 @@
         <p>Order <strong>${data.order_code}</strong> has been placed successfully.</p>
         <div class="pin-box receipt-modal-pin" style="background:rgba(46,125,50,.1);border:2px dashed var(--primary);border-radius:8px;padding:16px;text-align:center;margin:16px 0">
           <div style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em">Claim PIN</div>
-          <div style="font-size:2.5rem;font-weight:800;color:var(--primary);letter-spacing:.25em">${data.claim_pin}</div>
+          <div style="font-size:2.5rem;font-weight:800;color:var(--primary);letter-spacing:.25em">${escapeHtml(pinDisplay)}</div>
           <div style="font-size:.8125rem;color:var(--text-muted);margin-top:6px">Show this PIN with your Order ID at the counter to claim.</div>
         </div>
         <table class="table" style="font-size:.875rem">

@@ -22,6 +22,10 @@ try {
     $order = $stmt->fetch();
     if (!$order) throw new RuntimeException('Order not found.');
 
+    if ($order['status'] === 'claimed') {
+        throw new RuntimeException('Claimed orders cannot be deleted.');
+    }
+
     // If pending/ready, restore stock first
     if (in_array($order['status'], ['pending', 'ready'], true)) {
         $items = $pdo->prepare("SELECT item_id, quantity FROM order_items WHERE order_id = ?");

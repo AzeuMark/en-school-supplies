@@ -33,6 +33,20 @@ function generate_claim_pin() {
     return str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
 }
 
+function normalize_claim_pin_input($value) {
+    $pin = strtoupper(trim((string)$value));
+    if (strpos($pin, 'GST-') === 0) {
+        $pin = substr($pin, 4);
+    }
+    return preg_match('/^\d{4}$/', $pin) ? $pin : '';
+}
+
+function format_claim_pin_display($pin, $is_guest) {
+    $normalized = normalize_claim_pin_input($pin);
+    if ($normalized === '') return '';
+    return $is_guest ? ('GST-' . $normalized) : $normalized;
+}
+
 function normalize_username($username) {
     return strtolower(trim((string)$username));
 }

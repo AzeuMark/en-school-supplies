@@ -14,7 +14,8 @@ csrf_check($body['csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
 
 $order_id = (int)($body['order_id'] ?? 0);
 $action   = (string)($body['action'] ?? ''); // 'ready' | 'claim'
-$pin      = (string)($body['pin'] ?? '');
+$pin_raw  = (string)($body['pin'] ?? '');
+$pin      = normalize_claim_pin_input($pin_raw);
 
 if ($order_id <= 0 || !in_array($action, ['ready', 'claim'], true)) {
     json_response(['ok' => false, 'error' => 'Invalid request.'], 400);
@@ -39,11 +40,11 @@ if ($action === 'ready') {
 }
 
 // Claim — verify PIN
-if (!in_array($order['status'], ['pending', 'ready'], true)) {
-    json_response(['ok' => false, 'error' => 'This order cannot be claimed.'], 400);
+if ($order['status'] !== 'ready') {
+    json_response(['ok' => false, 'error' => 'Only ready orders can be claimed.'], 400);
 }
-if (!preg_match('/^\d{4}$/', $pin)) {
-    json_response(['ok' => false, 'error' => 'Please enter the 4-digit Claim PIN.'], 400);
+if ($pin === '') {
+    json_response(['ok' => false, 'error' => 'Please enter a valid Claim PIN.'], 400);
 }
 if (!hash_equals((string)$order['claim_pin'], $pin)) {
     log_warning('Claim PIN mismatch', ['order_id' => $order_id, 'by' => $uid]);

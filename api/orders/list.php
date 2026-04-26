@@ -65,8 +65,16 @@ if ($orders) {
         $o['items'] = $by_order[$o['id']] ?? [];
         $o['id'] = (int)$o['id'];
         $o['total_price'] = (float)$o['total_price'];
+        $is_guest_order = empty($o['user_id']);
+        $o['is_guest_order'] = $is_guest_order;
+        if (in_array($role, ['admin', 'staff'], true)) {
+            $o['claim_pin_display'] = format_claim_pin_display((string)$o['claim_pin'], $is_guest_order);
+        }
         // Hide PIN unless admin/staff
-        if (!in_array($role, ['admin', 'staff'], true)) unset($o['claim_pin']);
+        if (!in_array($role, ['admin', 'staff'], true)) {
+            unset($o['claim_pin']);
+            unset($o['claim_pin_display']);
+        }
     }
     unset($o);
 }

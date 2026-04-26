@@ -137,6 +137,8 @@ json_response([
     'order_id'    => $order_id,
     'order_code'  => $order_code,
     'claim_pin'   => $claim_pin,
+    'claim_pin_display' => format_claim_pin_display($claim_pin, $is_guest),
+    'is_guest_order' => $is_guest,
     'total'       => round($total, 2),
     'receipt_url' => $receipt_url,
     'items'       => array_map(function ($l) {

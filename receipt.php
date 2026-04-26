@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/helpers.php';
 
 $order_code = trim((string)($_GET['order'] ?? ''));
 $pin        = trim((string)($_GET['pin'] ?? ''));
+$pin_check  = normalize_claim_pin_input($pin);
 
 if ($order_code === '') { http_response_code(400); die('Missing order.'); }
 
@@ -21,7 +22,7 @@ if ($me) {
     if (in_array($me['role'], ['admin', 'staff'], true)) $ok = true;
     elseif ((int)$order['user_id'] === (int)$me['id'])    $ok = true;
 }
-if (!$ok && hash_equals((string)$order['claim_pin'], $pin)) $ok = true;
+if (!$ok && $pin_check !== '' && hash_equals((string)$order['claim_pin'], $pin_check)) $ok = true;
 
 if (!$ok) { http_response_code(403); include __DIR__ . '/403.php'; exit; }
 
@@ -32,6 +33,8 @@ $items = $itemsStmt->fetchAll();
 $store_name = get_setting('store_name', config('system.store_name'));
 $logo_path  = get_setting('logo_path', config('system.logo_path'));
 $store_phone = get_setting('store_phone', '');
+$is_guest_order = empty($order['user_id']);
+$display_pin = format_claim_pin_display((string)$order['claim_pin'], $is_guest_order);
 
 $customer_label = 'Guest: ' . ($order['guest_name'] ?: 'N/A');
 if ($order['user_id']) {
@@ -71,7 +74,7 @@ if ($order['user_id']) {
   <?php if ($order['status'] !== 'claimed' && $order['status'] !== 'cancelled'): ?>
   <div class="pin-box">
     <div class="label">Claim PIN</div>
-    <div class="value"><?= e($order['claim_pin']) ?></div>
+    <div class="value"><?= e($display_pin) ?></div>
     <div class="r-sub" style="margin-top:6px;font-size:.75rem">Show this PIN with your Order ID at the counter to claim.</div>
   </div>
   <?php endif; ?>
