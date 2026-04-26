@@ -7,6 +7,7 @@
   const fStock = document.getElementById('filter-stock');
   const sortBy = document.getElementById('sort-by');
   const sortDir = document.getElementById('sort-dir');
+  const metaEl = document.getElementById('inventory-meta');
   const categories = window._categories || [];
   const defaultNames = window._defaultNames || [];
 
@@ -14,6 +15,7 @@
 
   async function load() {
     tbl.innerHTML = '<div class="empty-state">Loading...</div>';
+    if (metaEl) metaEl.textContent = 'Loading items...';
     const params = new URLSearchParams({
       page: state.page,
       q: state.q,
@@ -26,33 +28,56 @@
     });
     const res = await fetch(EN.BASE + '/api/inventory/get_items.php?' + params.toString());
     const data = await res.json();
-    if (!data.ok) { tbl.innerHTML = '<div class="empty-state">Failed to load.</div>'; return; }
+    if (!data.ok) {
+      tbl.innerHTML = '<div class="empty-state">Failed to load.</div>';
+      if (metaEl) metaEl.textContent = 'Unable to load inventory right now.';
+      return;
+    }
+
+    if (metaEl) {
+      const count = Number(data.total || 0);
+      const noun = count === 1 ? 'item' : 'items';
+      metaEl.textContent = `${count.toLocaleString('en-PH')} ${noun} total • Page ${data.page} of ${Math.max(1, Number(data.total_pages || 1))}`;
+    }
+
     render(data.items);
     Pagination.render(pagEl, { current: data.page, total: data.total_pages, onChange: (p) => { state.page = p; load(); } });
   }
 
   function render(items) {
-    if (!items.length) { tbl.innerHTML = '<div class="empty-state"><div class="es-icon">📚</div><div class="es-title">No items found</div></div>'; return; }
+    if (!items.length) {
+      tbl.innerHTML = '<div class="empty-state"><div class="es-icon">📚</div><div class="es-title">No items found</div><div>Try changing your filters or search term.</div></div>';
+      return;
+    }
+
     tbl.innerHTML = `<div class="table-wrap"><table class="table">
-      <thead><tr><th style="width:56px"></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Max/Order</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Stock</th><th>Max/Order</th><th>Actions</th></tr></thead>
       <tbody>
         ${items.map(it => {
-          const img = it.item_image ? `<img src="${EN.BASE}/${it.item_image}" style="width:48px;height:48px;object-fit:cover;border-radius:6px">` : '<span style="font-size:24px">📦</span>';
-          const stockClass = it.status === 'low_stock' ? 'badge-warning' : it.status === 'no_stock' ? 'badge-danger' : '';
+          const img = it.item_image
+            ? `<span class="inv-thumb"><img src="${EN.BASE}/${it.item_image}" alt="${EN.escapeHtml(it.item_name)}"></span>`
+            : '<span class="inv-thumb inv-thumb-placeholder">📦</span>';
+
+          const stockClass = it.status === 'low_stock' ? 'badge-warning' : it.status === 'no_stock' ? 'badge-danger' : 'badge-success';
+          const stockLabel = it.status === 'low_stock' ? 'Low stock' : it.status === 'no_stock' ? 'No stock' : 'In stock';
+
           return `<tr>
-            <td>${img}</td>
-            <td><strong>${EN.escapeHtml(it.item_name)}</strong></td>
-            <td>${EN.escapeHtml(it.category || '—')}</td>
-            <td>${EN.formatPrice(it.price)}</td>
-            <td><span class="badge ${stockClass}">${it.stock_count}</span></td>
-            <td>${it.max_order_qty}</td>
-            <td><div class="actions">
+            <td>
+              <div class="inv-item-cell">
+                ${img}
+                <div class="inv-name">
+                  <strong>${EN.escapeHtml(it.item_name)}</strong>
+                </div>
+              </div>
+            </td>
+            <td><span class="inv-category">${EN.escapeHtml(it.category || 'Uncategorized')}</span></td>
+            <td><span class="inv-price">${EN.formatPrice(it.price)}</span></td>
+            <td><span class="badge ${stockClass}">${stockLabel}</span><div class="inv-stock-count">${it.stock_count} unit${it.stock_count === 1 ? '' : 's'}</div></td>
+            <td><span class="inv-max">${it.max_order_qty}</span></td>
+            <td><div class="inv-actions">
               <button class="btn btn-sm btn-secondary" data-edit="${it.id}" title="Edit">Edit</button>
               <button class="btn btn-sm btn-danger" data-del="${it.id}" data-name="${EN.escapeHtml(it.item_name)}" title="Delete">Delete</button>
-              <form class="quick-stock-form" data-add-stock-form data-id="${it.id}" data-name="${EN.escapeHtml(it.item_name)}">
-                <input class="input quick-stock-input" type="number" min="1" step="1" value="1" aria-label="Stock to add for ${EN.escapeHtml(it.item_name)}">
-                <button class="btn btn-sm" type="submit">Add Stock</button>
-              </form>
+              <button class="btn btn-sm" data-add-stock="${it.id}" data-name="${EN.escapeHtml(it.item_name)}" title="Add Stock">Add</button>
             </div></td>
           </tr>`;
         }).join('')}
@@ -79,7 +104,7 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
         <div class="field"><label>Price (₱)</label><input class="input" name="price" type="number" step="0.01" min="0.01" required value="${it.price || ''}"></div>
-        <div class="field"><label>Stock</label><input class="input" name="stock_count" type="number" min="0" required value="${it.stock_count ?? ''}"></div>
+        <div class="field"><label>Stock</label><input class="input" name="stock_count" type="number" min="1" required value="${it.stock_count ?? ''}"><div class="field-help">Must be at least 1 for new items.</div></div>
         <div class="field"><label>Max/Order</label><input class="input" name="max_order_qty" type="number" min="1" required value="${it.max_order_qty || 10}"></div>
       </div>
       <div class="field">
@@ -116,24 +141,6 @@
     });
   });
 
-  // Inline stock add
-  tbl.addEventListener('submit', async (e) => {
-    const form = e.target.closest('[data-add-stock-form]');
-    if (!form) return;
-    e.preventDefault();
-    const input = form.querySelector('.quick-stock-input');
-    const amount = +(input?.value || 0);
-    if (!Number.isInteger(amount) || amount < 1) {
-      EN.toast('Enter a valid stock amount.', 'error');
-      return;
-    }
-    try {
-      await EN.api('/api/inventory/add_stock.php', { body: { id: +form.dataset.id, amount } });
-      EN.toast(`Stock added to ${form.dataset.name}.`, 'success');
-      load();
-    } catch (_) {}
-  });
-
   // Edit / Delete
   tbl.addEventListener('click', async (e) => {
     const ed = e.target.closest('[data-edit]');
@@ -154,6 +161,49 @@
       });
       return;
     }
+
+    const addStock = e.target.closest('[data-add-stock]');
+    if (addStock) {
+      const id = +addStock.dataset.addStock;
+      const itemName = addStock.dataset.name || 'this item';
+
+      const bd = Modal.show({
+        title: `Add Stock — ${itemName}`,
+        html: `
+          <div class="field">
+            <label>Quantity to add</label>
+            <input class="input" id="stock-amount" type="number" min="1" step="1" value="1" inputmode="numeric" autofocus>
+            <div class="field-help">Enter a whole number greater than 0.</div>
+          </div>`,
+        footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-confirm-add-stock>Add Stock</button>`,
+      });
+
+      const amountInput = bd.querySelector('#stock-amount');
+      const submitAddStock = async () => {
+        const amount = +(amountInput?.value || 0);
+        if (!Number.isInteger(amount) || amount < 1) {
+          EN.toast('Enter a valid stock amount.', 'error');
+          if (amountInput) amountInput.focus();
+          return;
+        }
+        try {
+          await EN.api('/api/inventory/add_stock.php', { body: { id, amount } });
+          Modal.close(bd);
+          EN.toast(`Stock added to ${itemName}.`, 'success');
+          load();
+        } catch (_) {}
+      };
+
+      bd.querySelector('[data-confirm-add-stock]').addEventListener('click', submitAddStock);
+      amountInput?.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          submitAddStock();
+        }
+      });
+      return;
+    }
+
     const del = e.target.closest('[data-del]');
     if (del) {
       const ok = await Modal.confirm({ title: 'Delete item?', message: `Permanently delete "${del.dataset.name}"?`, confirmText: 'Delete', danger: true });

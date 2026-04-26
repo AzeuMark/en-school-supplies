@@ -86,7 +86,7 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
         <div class="field-help">When offline, only admins can log in. Maintenance allows staff too.</div>
       </div>
       <div class="field"><label>Auto-Logout (hours)</label><input class="input" name="auto_logout_hours" type="number" min="1" max="72" value="<?= e($s['auto_logout_hours']) ?>"><div class="field-help">Logs out inactive staff after this many hours for security.</div></div>
-      <div class="field"><label>Low Stock Threshold (%)</label><input class="input" name="low_stock_percent" type="number" min="1" max="100" value="<?= e($s['low_stock_percent']) ?>"><div class="field-help">Items at or below this percentage are marked as low stock.</div></div>
+      <div class="field"><label>Low Stock Threshold (%)</label><input class="input" name="low_stock_percent" type="number" min="1" max="100" step="1" inputmode="numeric" value="<?= e($s['low_stock_percent']) ?>"><div class="field-help">Items at or below this whole-number percentage are marked as low stock.</div></div>
       <div class="field"><label>Kiosk Idle Timeout (seconds)</label><input class="input" name="kiosk_idle_seconds" type="number" min="30" max="600" value="<?= e($s['kiosk_idle_seconds']) ?>"><div class="field-help">Resets the kiosk screen after this many seconds of inactivity.</div></div>
     </div>
 

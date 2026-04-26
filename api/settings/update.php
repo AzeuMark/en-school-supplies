@@ -55,9 +55,28 @@ if (!is_array($settings) || empty($settings)) {
     json_response(['ok' => false, 'error' => 'No settings provided.'], 400);
 }
 
+$intRules = [
+    'auto_logout_hours'  => ['min' => 1, 'max' => 72, 'label' => 'Auto-Logout (hours)'],
+    'low_stock_percent'  => ['min' => 1, 'max' => 100, 'label' => 'Low Stock Threshold (%)'],
+    'kiosk_idle_seconds' => ['min' => 30, 'max' => 600, 'label' => 'Kiosk Idle Timeout (seconds)'],
+];
+
 $updated = 0;
 foreach ($settings as $key => $value) {
     if (!in_array($key, $allowed, true)) continue;
+
+    if (isset($intRules[$key])) {
+        $raw = trim((string)$value);
+        if (!preg_match('/^-?\d+$/', $raw)) {
+            json_response(['ok' => false, 'error' => $intRules[$key]['label'] . ' must be a whole number.'], 400);
+        }
+        $intVal = (int)$raw;
+        if ($intVal < $intRules[$key]['min'] || $intVal > $intRules[$key]['max']) {
+            json_response(['ok' => false, 'error' => sprintf('%s must be between %d and %d.', $intRules[$key]['label'], $intRules[$key]['min'], $intRules[$key]['max'])], 400);
+        }
+        $value = (string)$intVal;
+    }
+
     if ($key === 'navbar_country_flag') {
         $value = navbar_country_flag_code($value);
     }

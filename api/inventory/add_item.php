@@ -20,7 +20,7 @@ $max_order_qty = (int)($_POST['max_order_qty'] ?? 10);
 $errors = [];
 if ($item_name === '') $errors[] = 'Item name is required.';
 if ($price <= 0)       $errors[] = 'Price must be greater than zero.';
-if ($stock_count < 0)  $errors[] = 'Stock cannot be negative.';
+if ($stock_count < 1)  $errors[] = 'Stock must be at least 1 when adding a new item.';
 if ($max_order_qty < 1) $errors[] = 'Max order quantity must be at least 1.';
 
 if ($errors) json_response(['ok' => false, 'error' => implode(' ', $errors)], 400);

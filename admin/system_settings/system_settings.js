@@ -3,6 +3,18 @@
   document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
+    const lowStockInput = form.querySelector('input[name="low_stock_percent"]');
+    const lowStockValue = parseInt((lowStockInput?.value || '').trim(), 10);
+    if (!Number.isInteger(lowStockValue) || lowStockValue < 1 || lowStockValue > 100) {
+      EN.toast('Low Stock Threshold must be a whole number between 1 and 100.', 'error');
+      if (lowStockInput) {
+        lowStockInput.focus();
+        lowStockInput.select();
+      }
+      return;
+    }
+    if (lowStockInput) lowStockInput.value = String(lowStockValue);
+
     const formData = new FormData();
 
     // Text/number inputs
