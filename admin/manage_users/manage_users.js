@@ -21,7 +21,7 @@
   function render(users) {
     if (!users.length) { tbl.innerHTML = '<div class="empty-state"><div class="es-icon">👥</div><div class="es-title">No users found</div></div>'; return; }
     tbl.innerHTML = `<div class="table-wrap"><table class="table">
-      <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
       <tbody>
         ${users.map(u => `
           <tr>
@@ -32,8 +32,11 @@
             <td>${EN.escapeHtml(u.phone)}</td>
             <td><span class="badge">${u.role}</span></td>
             <td><span class="badge status-${u.status}">${u.status}</span></td>
+            <td>${u.status === 'flagged' ? `<span class="text-muted">${EN.escapeHtml(u.flag_reason || 'No reason provided')}</span>` : (u.status === 'pending' ? '<span class="text-muted">Awaiting approval</span>' : '<span class="text-muted">—</span>')}</td>
             <td><div class="actions">
               <button class="btn btn-sm btn-secondary" data-edit='${JSON.stringify(u).replace(/'/g,"&#39;")}' title="Edit">✏️</button>
+              ${u.status === 'pending' ? `<button class="btn btn-sm" data-approve="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Approve">✓ Approve</button>` : ''}
+              ${u.role !== 'admin' && u.status === 'flagged' ? `<button class="btn btn-sm" data-unflag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Unflag">↺ Unflag</button>` : ''}
               ${u.role !== 'admin' && u.status !== 'flagged' ? `<button class="btn btn-sm btn-warning" data-flag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Flag">🚩</button>` : ''}
               ${u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" data-del="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Delete">🗑️</button>` : ''}
             </div></td>
@@ -88,6 +91,20 @@
         if (!reason) { EN.toast('Please enter a reason.', 'error'); return; }
         try { await EN.api('/api/users/flag_user.php', { body: { id, reason } }); Modal.close(bd); EN.toast('User flagged.', 'success'); load(); } catch (_) {}
       });
+      return;
+    }
+    const ap = e.target.closest('[data-approve]');
+    if (ap) {
+      const ok = await Modal.confirm({ title: 'Approve account?', message: `Allow ${ap.dataset.name} to log in.`, confirmText: 'Approve' });
+      if (!ok) return;
+      try { await EN.api('/api/users/approve_user.php', { body: { id: +ap.dataset.approve } }); EN.toast('User approved.', 'success'); load(); } catch (_) {}
+      return;
+    }
+    const uf = e.target.closest('[data-unflag]');
+    if (uf) {
+      const ok = await Modal.confirm({ title: 'Unflag user?', message: `Reactivate ${uf.dataset.name}?`, confirmText: 'Unflag' });
+      if (!ok) return;
+      try { await EN.api('/api/users/unflag_user.php', { body: { id: +uf.dataset.unflag } }); EN.toast('User unflagged.', 'success'); load(); } catch (_) {}
       return;
     }
     const del = e.target.closest('[data-del]');

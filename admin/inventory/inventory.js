@@ -4,14 +4,26 @@
   const pagEl = document.getElementById('pagination');
   const search = document.getElementById('search');
   const fCat = document.getElementById('filter-cat');
+  const fStock = document.getElementById('filter-stock');
+  const sortBy = document.getElementById('sort-by');
+  const sortDir = document.getElementById('sort-dir');
   const categories = window._categories || [];
   const defaultNames = window._defaultNames || [];
 
-  let state = { page: 1, q: '', category: '' };
+  let state = { page: 1, q: '', category: '', stockFilter: 'all', sortBy: 'name', sortDir: 'asc' };
 
   async function load() {
     tbl.innerHTML = '<div class="empty-state">Loading...</div>';
-    const params = new URLSearchParams({ page: state.page, q: state.q, category: state.category, per_page: 15, in_stock: '' });
+    const params = new URLSearchParams({
+      page: state.page,
+      q: state.q,
+      category: state.category,
+      per_page: 15,
+      in_stock: '',
+      stock_filter: state.stockFilter,
+      sort_by: state.sortBy,
+      sort_dir: state.sortDir,
+    });
     const res = await fetch(EN.BASE + '/api/inventory/get_items.php?' + params.toString());
     const data = await res.json();
     if (!data.ok) { tbl.innerHTML = '<div class="empty-state">Failed to load.</div>'; return; }
@@ -35,8 +47,12 @@
             <td><span class="badge ${stockClass}">${it.stock_count}</span></td>
             <td>${it.max_order_qty}</td>
             <td><div class="actions">
-              <button class="btn btn-sm btn-secondary" data-edit="${it.id}" title="Edit">✏️</button>
-              <button class="btn btn-sm btn-danger" data-del="${it.id}" data-name="${EN.escapeHtml(it.item_name)}" title="Delete">🗑️</button>
+              <button class="btn btn-sm btn-secondary" data-edit="${it.id}" title="Edit">Edit</button>
+              <button class="btn btn-sm btn-danger" data-del="${it.id}" data-name="${EN.escapeHtml(it.item_name)}" title="Delete">Delete</button>
+              <form class="quick-stock-form" data-add-stock-form data-id="${it.id}" data-name="${EN.escapeHtml(it.item_name)}">
+                <input class="input quick-stock-input" type="number" min="1" step="1" value="1" aria-label="Stock to add for ${EN.escapeHtml(it.item_name)}">
+                <button class="btn btn-sm" type="submit">Add Stock</button>
+              </form>
             </div></td>
           </tr>`;
         }).join('')}
@@ -52,6 +68,7 @@
   }
 
   function itemFormHtml(it = {}) {
+    const fileText = it.item_image ? 'Current image kept unless you choose a new one' : 'No file chosen';
     return `
       <div class="field"><label>Item Name</label>
         <input class="input" name="item_name" list="names-dl" required maxlength="150" value="${EN.escapeHtml(it.item_name || '')}">
@@ -65,7 +82,24 @@
         <div class="field"><label>Stock</label><input class="input" name="stock_count" type="number" min="0" required value="${it.stock_count ?? ''}"></div>
         <div class="field"><label>Max/Order</label><input class="input" name="max_order_qty" type="number" min="1" required value="${it.max_order_qty || 10}"></div>
       </div>
-      <div class="field"><label>Image (optional, max 2 MB)</label><input type="file" name="item_image" accept="image/jpeg,image/png,image/webp"></div>`;
+      <div class="field">
+        <label>Image (optional, max 2 MB)</label>
+        <label class="file-input">
+          <input type="file" name="item_image" accept="image/jpeg,image/png,image/webp" data-file-input>
+          <span class="file-input-btn">Choose File</span>
+          <span class="file-input-name" data-file-name>${fileText}</span>
+        </label>
+      </div>`;
+  }
+
+  function bindFileInputs(root) {
+    root.querySelectorAll('[data-file-input]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const nameEl = input.closest('.file-input')?.querySelector('[data-file-name]');
+        if (!nameEl) return;
+        nameEl.textContent = input.files && input.files[0] ? input.files[0].name : 'No file chosen';
+      });
+    });
   }
 
   // Add item
@@ -75,10 +109,29 @@
       html: `<form id="add-form" enctype="multipart/form-data">${itemFormHtml()}</form>`,
       footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-save-add>Add Item</button>`,
     });
+    bindFileInputs(bd);
     bd.querySelector('[data-save-add]').addEventListener('click', async () => {
       const fd = new FormData(bd.querySelector('#add-form'));
       try { await EN.api('/api/inventory/add_item.php', { formData: fd }); Modal.close(bd); EN.toast('Item added.', 'success'); load(); } catch (_) {}
     });
+  });
+
+  // Inline stock add
+  tbl.addEventListener('submit', async (e) => {
+    const form = e.target.closest('[data-add-stock-form]');
+    if (!form) return;
+    e.preventDefault();
+    const input = form.querySelector('.quick-stock-input');
+    const amount = +(input?.value || 0);
+    if (!Number.isInteger(amount) || amount < 1) {
+      EN.toast('Enter a valid stock amount.', 'error');
+      return;
+    }
+    try {
+      await EN.api('/api/inventory/add_stock.php', { body: { id: +form.dataset.id, amount } });
+      EN.toast(`Stock added to ${form.dataset.name}.`, 'success');
+      load();
+    } catch (_) {}
   });
 
   // Edit / Delete
@@ -94,6 +147,7 @@
         html: `<form id="edit-form" enctype="multipart/form-data"><input type="hidden" name="id" value="${id}">${itemFormHtml(it)}</form>`,
         footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-save-edit>Save</button>`,
       });
+      bindFileInputs(bd);
       bd.querySelector('[data-save-edit]').addEventListener('click', async () => {
         const fd = new FormData(bd.querySelector('#edit-form'));
         try { await EN.api('/api/inventory/edit_item.php', { formData: fd }); Modal.close(bd); EN.toast('Item updated.', 'success'); load(); } catch (_) {}
@@ -106,6 +160,22 @@
       if (!ok) return;
       try { await EN.api('/api/inventory/delete_item.php', { body: { id: +del.dataset.del } }); EN.toast('Item deleted.', 'success'); load(); } catch (_) {}
     }
+  });
+
+  document.querySelector('[data-delete-all-inventory]').addEventListener('click', async () => {
+    const ok = await Modal.confirm({
+      title: 'Delete all inventory?',
+      message: 'This permanently removes every inventory item. It will be blocked if existing order history still references any items.',
+      confirmText: 'Delete All',
+      danger: true
+    });
+    if (!ok) return;
+    try {
+      const data = await EN.api('/api/inventory/delete_all.php', { body: {} });
+      EN.toast(data.message || 'All inventory deleted.', 'success');
+      state.page = 1;
+      load();
+    } catch (_) {}
   });
 
   // Categories management
@@ -157,6 +227,18 @@
     clearTimeout(window._dbi); window._dbi = setTimeout(() => { state.q = search.value.trim(); state.page = 1; load(); }, 300);
   });
   fCat.addEventListener('change', () => { state.category = fCat.value; state.page = 1; load(); });
+  fStock.addEventListener('change', () => { state.stockFilter = fStock.value; state.page = 1; load(); });
+  sortBy.addEventListener('change', () => { state.sortBy = sortBy.value; state.page = 1; load(); });
+  sortDir.addEventListener('change', () => { state.sortDir = sortDir.value; state.page = 1; load(); });
+  document.querySelector('[data-reset-filters]').addEventListener('click', () => {
+    state = { page: 1, q: '', category: '', stockFilter: 'all', sortBy: 'name', sortDir: 'asc' };
+    search.value = '';
+    fCat.value = '';
+    fStock.value = 'all';
+    sortBy.value = 'name';
+    sortDir.value = 'asc';
+    load();
+  });
 
   load();
 })();

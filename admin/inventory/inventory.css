@@ -1,6 +1,125 @@
 /* Inventory — admin */
-.actions { flex-wrap: wrap; }
+.inventory-filters {
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+.inventory-filters-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.inventory-filters-head h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.inventory-filters-head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .92rem;
+}
+
+.inventory-toolbar {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inventory-toolbar > * {
+  min-width: 180px;
+}
+
+.inventory-toolbar .search-box {
+  min-width: min(100%, 280px);
+}
+
+.actions {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-stock-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.quick-stock-input {
+  width: 84px;
+  min-width: 84px;
+  padding-inline: 10px;
+}
+
+.file-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.file-input input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-input-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.file-input-name {
+  min-width: 0;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 768px) {
+  .inventory-filters-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inventory-toolbar > * {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .quick-stock-form {
+    width: 100%;
+  }
+
+  .quick-stock-input {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
+  .file-input {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .table th:nth-child(1), .table td:nth-child(1),
   .table th:nth-child(6), .table td:nth-child(6) { display: none; }
 }

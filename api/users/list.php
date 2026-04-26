@@ -3,10 +3,7 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 
-require_role('admin', 'staff');
-
-$me   = get_current_user_data();
-$role = $me['role'];
+require_role('admin');
 
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $per_page = 15;
@@ -16,12 +13,6 @@ $filter_status = (string)($_GET['status'] ?? '');
 
 $where  = [];
 $params = [];
-
-// Staff only see customers (and only pending) for their pending_accounts page
-if ($role === 'staff') {
-    $where[]  = "u.role = 'customer'";
-    if ($filter_status === '') $filter_status = 'pending';
-}
 
 if (in_array($filter_role, ['admin', 'staff', 'customer'], true)) {
     $where[]  = 'u.role = ?';

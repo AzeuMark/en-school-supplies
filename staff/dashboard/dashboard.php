@@ -8,7 +8,6 @@ $me = get_current_user_data();
 
 $pending_orders = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE status='pending'")->fetchColumn();
 $ready_orders   = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE status='ready'")->fetchColumn();
-$pending_acc    = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE status='pending'")->fetchColumn();
 $today_orders   = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURDATE()")->fetchColumn();
 
 // My processed count
@@ -37,14 +36,12 @@ include __DIR__ . '/../../includes/layout_header.php';
   <div class="card stat-card"><span class="stat-label">Pending Orders</span><span class="stat-value"><?= $pending_orders ?></span></div>
   <div class="card stat-card"><span class="stat-label">Ready Orders</span><span class="stat-value"><?= $ready_orders ?></span></div>
   <div class="card stat-card"><span class="stat-label">Orders Today</span><span class="stat-value"><?= $today_orders ?></span></div>
-  <div class="card stat-card"><span class="stat-label">Pending Accounts</span><span class="stat-value"><?= $pending_acc ?></span></div>
   <div class="card stat-card"><span class="stat-label">My Processed</span><span class="stat-value"><?= $my_processed ?></span></div>
 </div>
 
 <h2 class="mt-6 mb-4">Quick Actions</h2>
 <div class="actions-grid">
   <a class="action-card" href="<?= e(url('/staff/manage_orders/manage_orders.php')) ?>"><span class="ac-icon">📦</span><div><div class="ac-title">Manage Orders</div><div class="ac-desc">Process pending and ready orders</div></div></a>
-  <a class="action-card" href="<?= e(url('/staff/pending_accounts/pending_accounts.php')) ?>"><span class="ac-icon">⏳</span><div><div class="ac-title">Pending Accounts</div><div class="ac-desc">Approve new registrations</div></div></a>
 </div>
 
 <div class="card mt-6">

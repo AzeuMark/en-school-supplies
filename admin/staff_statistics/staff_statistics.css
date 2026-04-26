@@ -1,5 +1,0 @@
-/* Staff Statistics — admin */
-@media (max-width: 768px) {
-  .table th:nth-child(5), .table td:nth-child(5),
-  .table th:nth-child(6), .table td:nth-child(6) { display: none; }
-}

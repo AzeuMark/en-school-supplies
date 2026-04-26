@@ -38,17 +38,13 @@ A vanilla PHP/MySQL/JavaScript/CSS school supplies ordering and management syste
 │   ├── dashboard/
 │   ├── manage_orders/
 │   ├── manage_users/
-│   ├── pending_accounts/
-│   ├── flagged_users/
 │   ├── inventory/
-│   ├── staff_statistics/
 │   ├── analytics/
 │   ├── system_settings/
 │   └── profile/
 ├── staff/                  # Staff pages
 │   ├── dashboard/
 │   ├── manage_orders/
-│   ├── pending_accounts/
 │   └── profile/
 ├── customer/               # Customer pages
 │   ├── dashboard/
@@ -100,7 +96,7 @@ A vanilla PHP/MySQL/JavaScript/CSS school supplies ordering and management syste
 | Role       | Access                                                        |
 |------------|---------------------------------------------------------------|
 | **Admin**  | Full access: dashboard, orders, users, inventory, analytics, settings |
-| **Staff**  | Dashboard, manage orders (process/claim), approve pending accounts    |
+| **Staff**  | Dashboard, manage orders (process/claim), profile |
 | **Customer** | Dashboard, browse & order, order history, view receipts             |
 | **Kiosk**  | Public in-store terminal — browse items, place guest orders          |
 
@@ -114,6 +110,7 @@ A vanilla PHP/MySQL/JavaScript/CSS school supplies ordering and management syste
 - **Navbar Country Flag** — configurable country flag shown beside the clock using the included flag image pack
 - **Website Logo Upload** — admin can upload a PNG logo in System Settings and it appears in the navbar
 - **Role-Aware Navbar** — profile access is available from the navbar dropdown, not the sidebar
+- **Unified User Review** — pending and flagged accounts are handled directly in Admin `Manage Users`
 - **CSRF Protection** — token per session, validated on all mutations
 - **AES-256-CBC Encryption** — for password storage
 - **Dual Logging** — file + database

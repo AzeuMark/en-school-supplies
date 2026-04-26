@@ -60,8 +60,7 @@ include __DIR__ . '/../../includes/layout_header.php';
 <div class="actions-grid">
   <a class="action-card" href="<?= e(url('/admin/manage_orders/manage_orders.php')) ?>"><span class="ac-icon">📦</span><div><div class="ac-title">Manage Orders</div><div class="ac-desc">Process pending and ready orders</div></div></a>
   <a class="action-card" href="<?= e(url('/admin/inventory/inventory.php')) ?>"><span class="ac-icon">📚</span><div><div class="ac-title">Inventory</div><div class="ac-desc">Add and update items</div></div></a>
-  <a class="action-card" href="<?= e(url('/admin/manage_users/manage_users.php')) ?>"><span class="ac-icon">👥</span><div><div class="ac-title">Manage Users</div><div class="ac-desc">Add staff or customers</div></div></a>
-  <a class="action-card" href="<?= e(url('/admin/pending_accounts/pending_accounts.php')) ?>"><span class="ac-icon">⏳</span><div><div class="ac-title">Pending Accounts</div><div class="ac-desc">Approve new registrations</div></div></a>
+  <a class="action-card" href="<?= e(url('/admin/manage_users/manage_users.php')) ?>"><span class="ac-icon">👥</span><div><div class="ac-title">Manage Users</div><div class="ac-desc">Add users, approve pending, and handle flagged accounts</div></div></a>
   <a class="action-card" href="<?= e(url('/admin/analytics/analytics.php')) ?>"><span class="ac-icon">📈</span><div><div class="ac-title">Analytics</div><div class="ac-desc">Sales insights and charts</div></div></a>
   <a class="action-card" href="<?= e(url('/admin/system_settings/system_settings.php')) ?>"><span class="ac-icon">⚙️</span><div><div class="ac-title">System Settings</div><div class="ac-desc">Store info and preferences</div></div></a>
 </div>

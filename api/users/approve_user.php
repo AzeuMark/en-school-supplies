@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/logger.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 
-require_role('admin', 'staff');
+require_role('admin');
 require_post();
 
 $raw = file_get_contents('php://input');

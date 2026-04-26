@@ -14,6 +14,8 @@ include __DIR__ . '/../../includes/layout_header.php';
   <button class="btn" data-add-user>+ Add User</button>
 </div>
 
+<p class="text-muted mb-4">Review active users, approve pending accounts, and manage flagged accounts from one page.</p>
+
 <div class="toolbar">
   <div class="search-box"><input class="input" id="search" placeholder="Search by username, name, email, or phone..."></div>
   <select class="select-native" id="filter-role" data-custom-select>
