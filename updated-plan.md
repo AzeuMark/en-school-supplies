@@ -392,7 +392,7 @@ Current features:
 - Store phone.
 - Store email.
 - Timezone.
-- Navbar country flag selection.
+- Country selection.
 - System status.
 - Force dark mode.
 - Disable no-login orders.
@@ -665,7 +665,7 @@ Examples:
 - Store email.
 - Logo path.
 - Timezone.
-- Navbar country flag.
+- Country.
 - System status.
 - Force dark mode.
 - Auto-logout hours.
@@ -857,7 +857,7 @@ The settings page now includes descriptions for the most important values.
 - Store phone: used in contact surfaces and flagged-user instructions.
 - Store email: used in contact surfaces.
 - Timezone: controls displayed timestamps.
-- Navbar country flag: chooses the icon shown beside the clock.
+- Country: chooses the icon shown beside the clock.
 
 ### Operational controls
 

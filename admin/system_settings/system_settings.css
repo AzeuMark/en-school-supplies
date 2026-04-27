@@ -46,3 +46,37 @@
   padding: 12px 0; border-bottom: 1px solid var(--border);
 }
 .toggle-row:last-child { border-bottom: none; }
+
+/* Floating save button */
+.mt-5 {
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: flex-end;
+}
+.save-btn-floating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  margin: 0 !important;
+  padding: 0;
+}
+.save-btn-floating .btn {
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease, pulse-glow 2s infinite;
+}
+.save-btn-floating .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  animation: none;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
+  50% { box-shadow: 0 4px 24px rgba(46,125,50,0.6); }
+}

@@ -57,6 +57,7 @@ $status_label = $status_labels[$status] ?? ucfirst($status);
 $force_dark  = get_setting('force_dark', '0');
 $user_theme  = $user['theme'] ?? 'auto';
 $badges      = get_badge_counts();
+$timezone    = get_setting('timezone', config('system.timezone', 'Asia/Manila'));
 
 // Sidebar definition per role.
 // Each item: ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => '🏠', 'href' => '/admin/dashboard/dashboard.php', 'badge' => 'pending_orders']
@@ -173,7 +174,7 @@ $flash_ok  = flash_pop('flash_success');
           <?php else: ?>
             <span class="nav-flag nav-flag-fallback" aria-label="<?= e($flag_label) ?>" title="<?= e($flag_label) ?>"><?= e($flag_code) ?></span>
           <?php endif; ?>
-          <span data-navbar-clock></span>
+          <span data-navbar-clock data-timezone="<?= e($timezone) ?>"></span>
         </span>
 
         <span class="system-status <?= e($status) ?>">

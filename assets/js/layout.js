@@ -49,10 +49,11 @@
     const el = document.querySelector('[data-navbar-clock]');
     if (!el) return;
     const d = new Date();
-    el.textContent = d.toLocaleString('en-PH', {
+    const timezone = el.dataset.timezone || 'Asia/Manila';
+    el.textContent = d.toLocaleString('en-US', {
       weekday: 'short', month: 'short', day: 'numeric',
       hour: 'numeric', minute: '2-digit', hour12: true,
-      timeZone: 'Asia/Manila',
+      timeZone: timezone,
     });
   }
   tick();

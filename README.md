@@ -107,7 +107,7 @@ A vanilla PHP/MySQL/JavaScript/CSS school supplies ordering and management syste
 - **Stock Deduction** — stock deducted on order placement, restored on cancellation
 - **Dark/Light Theme** — auto (OS preference), manual toggle, force dark mode (admin setting)
 - **Username or Email Login** — users can sign in using either identifier
-- **Navbar Country Flag** — configurable country flag shown beside the clock using the included flag image pack
+- **Country** — configurable country flag shown beside the clock using the included flag image pack
 - **Website Logo Upload** — admin can upload a PNG logo in System Settings and it appears in the navbar
 - **Role-Aware Navbar** — profile access is available from the navbar dropdown, not the sidebar
 - **Unified User Review** — pending and flagged accounts are handled directly in Admin `Manage Users`

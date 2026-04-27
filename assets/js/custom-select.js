@@ -29,7 +29,15 @@
     function getOptionVisual(opt) {
       const icon = opt.dataset.icon || '';
       const emoji = opt.dataset.emoji || '';
-      const prefix = icon ? `<img src="${icon}" class="cs-icon" alt=""> ` : (emoji ? `<span class="cs-emoji">${emoji}</span> ` : '');
+      const status = opt.dataset.status || '';
+      let prefix = '';
+      if (icon) {
+        prefix = `<img src="${icon}" class="cs-icon" alt=""> `;
+      } else if (status) {
+        prefix = `<span class="cs-status-dot cs-status-${status}"></span> `;
+      } else if (emoji) {
+        prefix = `<span class="cs-emoji">${emoji}</span> `;
+      }
       return prefix + opt.textContent;
     }
 

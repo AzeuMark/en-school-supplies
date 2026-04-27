@@ -49,7 +49,11 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
             <?php endif; ?>
           </div>
           <div class="logo-upload-meta">
-            <input class="input" type="file" name="logo_file" accept="image/png,.png">
+            <label class="file-input">
+              <input type="file" name="logo_file" accept="image/png,.png" data-file-input>
+              <span class="file-input-btn">Choose File</span>
+              <span class="file-input-name" data-file-name><?= $logo_display_url ? 'Current logo set' : 'No file chosen' ?></span>
+            </label>
             <div class="field-help">PNG only, max 2 MB. This logo appears in the navbar and sidebar.</div>
           </div>
         </div>
@@ -91,7 +95,7 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
         <div class="field-help">Controls the date and time shown throughout the system.</div>
       </div>
       <div class="field">
-        <label>Navbar Country Flag</label>
+        <label>Country</label>
         <select class="select-native" name="navbar_country_flag" data-custom-select>
           <?php foreach (navbar_country_flag_options() as $group => $countries): ?>
             <optgroup label="<?= e($group) ?>">
@@ -111,9 +115,9 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
       <div class="field">
         <label>System Status</label>
         <select class="select-native" name="system_status" data-custom-select>
-          <option value="online" data-emoji="🟢" <?= $s['system_status']==='online'?'selected':'' ?>>Online</option>
-          <option value="maintenance" data-emoji="🟡" <?= $s['system_status']==='maintenance'?'selected':'' ?>>Maintenance</option>
-          <option value="offline" data-emoji="🔴" <?= $s['system_status']==='offline'?'selected':'' ?>>Offline</option>
+          <option value="online" data-status="online" <?= $s['system_status']==='online'?'selected':'' ?>>Online</option>
+          <option value="maintenance" data-status="maintenance" <?= $s['system_status']==='maintenance'?'selected':'' ?>>Maintenance</option>
+          <option value="offline" data-status="offline" <?= $s['system_status']==='offline'?'selected':'' ?>>Offline</option>
         </select>
         <div class="field-help">When offline, only admins can log in. Maintenance allows staff too.</div>
       </div>
