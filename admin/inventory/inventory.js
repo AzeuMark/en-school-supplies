@@ -124,7 +124,7 @@
   }
 
   function catOptions(selected) {
-    return `<option value="0">— None —</option>` + categories.map(c => `<option value="${c.id}" ${c.id == selected ? 'selected' : ''}>${EN.escapeHtml(c.category_name)}</option>`).join('');
+    return `<option value="0">— Uncategorized —</option>` + categories.map(c => `<option value="${c.id}" ${c.id == selected ? 'selected' : ''}>${EN.escapeHtml(c.category_name)}</option>`).join('');
   }
 
   function nameDatalist() {
@@ -139,7 +139,7 @@
         <datalist id="names-dl">${nameDatalist()}</datalist>
       </div>
       <div class="field"><label>Category</label>
-        <select class="select-native" name="category_id">${catOptions(it.category_id || 0)}</select>
+        <select class="select-native" name="category_id" data-custom-select>${catOptions(it.category_id || 0)}</select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
         <div class="field"><label>Price (₱)</label><input class="input" name="price" type="number" step="0.01" min="0.01" required value="${it.price || ''}"></div>
@@ -174,6 +174,7 @@
       footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-save-add>Add Item</button>`,
     });
     bindFileInputs(bd);
+    if (window.CustomSelect) window.CustomSelect.init(bd);
     bd.querySelector('[data-save-add]').addEventListener('click', async () => {
       const fd = new FormData(bd.querySelector('#add-form'));
       try { await EN.api('/api/inventory/add_item.php', { formData: fd }); Modal.close(bd); EN.toast('Item added.', 'success'); load(); } catch (_) {}
@@ -194,6 +195,7 @@
         footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button><button class="btn" data-save-edit>Save</button>`,
       });
       bindFileInputs(bd);
+      if (window.CustomSelect) window.CustomSelect.init(bd);
       bd.querySelector('[data-save-edit]').addEventListener('click', async () => {
         const fd = new FormData(bd.querySelector('#edit-form'));
         try { await EN.api('/api/inventory/edit_item.php', { formData: fd }); Modal.close(bd); EN.toast('Item updated.', 'success'); load(); } catch (_) {}
