@@ -441,6 +441,7 @@ $roleConfig = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Setup — E&amp;N School Supplies</title>
+    <link rel="icon" type="image/png" href="<?= htmlspecialchars(url('/uploads/system/logo.png')) ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(url('/assets/css/global.css')) ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(url('/assets/css/components.css')) ?>">
     <style>

@@ -7,6 +7,7 @@ if (!defined('APP_ROOT')) { require_once __DIR__ . '/includes/config.php'; requi
 <head>
 <meta charset="utf-8">
 <title>403 — Access Denied</title>
+<link rel="icon" type="image/png" href="<?= e(url('/uploads/system/logo.png')) ?>">
 <link rel="stylesheet" href="<?= e(url('/assets/css/global.css')) ?>">
 <style>
   .err-wrap { min-height: 100vh; display: grid; place-items: center; padding: 32px; }

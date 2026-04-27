@@ -48,6 +48,7 @@ if ($order['user_id']) {
 <head>
 <meta charset="utf-8">
 <title>Receipt — <?= e($order['order_code']) ?></title>
+<link rel="icon" type="image/png" href="<?= e(url('/' . ltrim($logo_path, '/'))) ?>">
 <link rel="stylesheet" href="<?= e(url('/assets/css/global.css')) ?>">
 <link rel="stylesheet" href="<?= e(url('/assets/css/components.css')) ?>">
 <link rel="stylesheet" href="<?= e(url('/assets/css/print.css')) ?>">

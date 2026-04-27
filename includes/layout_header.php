@@ -106,6 +106,7 @@ $flash_ok  = flash_pop('flash_success');
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <title><?= e($page_title) ?> — <?= e($store_name) ?></title>
+  <link rel="icon" type="image/png" href="<?= e(url('/' . ltrim($logo_path, '/'))) ?>">
   <link rel="stylesheet" href="<?= e(url('/assets/css/global.css')) ?>">
   <link rel="stylesheet" href="<?= e(url('/assets/css/components.css')) ?>">
   <link rel="stylesheet" href="<?= e(url('/assets/css/layout.css')) ?>">

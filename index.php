@@ -22,6 +22,7 @@ try {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($store_name) ?> — Welcome</title>
+<link rel="icon" type="image/png" href="<?= e(url('/' . ltrim($logo_path, '/'))) ?>">
 <link rel="stylesheet" href="<?= e(url('/assets/css/global.css')) ?>">
 <link rel="stylesheet" href="<?= e(url('/assets/css/components.css')) ?>">
 <style>
