@@ -4,17 +4,73 @@
   const pagEl = document.getElementById('pagination');
   const search = document.getElementById('search');
   const tabs = document.querySelector('[data-status-tabs]');
+  const fOrderType = document.getElementById('filter-order-type');
+  const fDate = document.getElementById('filter-date');
+  const sortPreset = document.getElementById('sort-preset');
+  const filterSummaryEl = document.getElementById('filter-summary');
+  const resetBtn = document.querySelector('[data-reset-filters]');
   const role = 'staff';
   const canDelete = role === 'admin';
   const previewItemLimit = 5;
 
-  let state = { page: 1, status: '', q: '' };
+  let state = { page: 1, status: '', q: '', orderType: 'all', dateFilter: 'all', sort: 'newest' };
   let orderMap = new Map();
   let searchTimer = null;
 
+  const statusLabelMap = {
+    '': 'All Statuses',
+    pending: 'Pending',
+    ready: 'Ready',
+    claimed: 'Claimed',
+    cancelled: 'Cancelled',
+  };
+
+  const orderTypeLabelMap = {
+    all: 'All Orders',
+    guest: 'Guest Orders',
+    registered: 'Registered Orders',
+  };
+
+  const dateLabelMap = {
+    all: 'All Time',
+    today: 'Today',
+    week: 'Last 7 Days',
+    month: 'Last 30 Days',
+  };
+
+  const sortLabelMap = {
+    newest: 'Newest First',
+    oldest: 'Oldest First',
+    total_desc: 'Total (High to Low)',
+    total_asc: 'Total (Low to High)',
+    customer_asc: 'Customer (A-Z)',
+    customer_desc: 'Customer (Z-A)',
+    code_asc: 'Order Code (A-Z)',
+    code_desc: 'Order Code (Z-A)',
+  };
+
+  function updateFilterSummary() {
+    if (!filterSummaryEl) return;
+    const parts = [];
+    if (state.q) parts.push(`Search: "${state.q}"`);
+    if (state.status) parts.push(`Status: ${statusLabelMap[state.status]}`);
+    if (state.orderType !== 'all') parts.push(`Type: ${orderTypeLabelMap[state.orderType] || 'Filtered'}`);
+    if (state.dateFilter !== 'all') parts.push(`Date: ${dateLabelMap[state.dateFilter] || 'Filtered'}`);
+    const filtersText = parts.length ? parts.join(' • ') : 'Showing all orders';
+    const sortText = sortLabelMap[state.sort] || sortLabelMap.newest;
+    filterSummaryEl.textContent = `${filtersText} • Sorted by ${sortText}`;
+  }
+
   async function load() {
     tbl.innerHTML = '<div class="empty-state">Loading...</div>';
-    const params = new URLSearchParams({ page: state.page, status: state.status, q: state.q });
+    const params = new URLSearchParams({
+      page: state.page,
+      status: state.status,
+      q: state.q,
+      order_type: state.orderType,
+      date_filter: state.dateFilter,
+      sort: state.sort,
+    });
     try {
       const res = await fetch(EN.BASE + '/api/orders/list.php?' + params.toString());
       const data = await res.json();
@@ -31,6 +87,7 @@
           load();
         },
       });
+      updateFilterSummary();
     } catch (_) {
       tbl.innerHTML = '<div class="empty-state">Failed to load.</div>';
     }
@@ -283,5 +340,46 @@
     }, 300);
   });
 
+  if (fOrderType) {
+    fOrderType.addEventListener('change', () => {
+      state.orderType = fOrderType.value;
+      state.page = 1;
+      load();
+    });
+  }
+
+  if (fDate) {
+    fDate.addEventListener('change', () => {
+      state.dateFilter = fDate.value;
+      state.page = 1;
+      load();
+    });
+  }
+
+  if (sortPreset) {
+    sortPreset.addEventListener('change', () => {
+      state.sort = sortPreset.value || 'newest';
+      state.page = 1;
+      load();
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      state = { page: 1, status: '', q: '', orderType: 'all', dateFilter: 'all', sort: 'newest' };
+      if (search) search.value = '';
+      if (fOrderType) fOrderType.value = 'all';
+      if (fDate) fDate.value = 'all';
+      if (sortPreset) sortPreset.value = 'newest';
+      if (tabs) {
+        tabs.querySelectorAll('button').forEach((x) => x.classList.remove('active'));
+        const allTab = tabs.querySelector('button[data-status=""]');
+        if (allTab) allTab.classList.add('active');
+      }
+      load();
+    });
+  }
+
+  updateFilterSummary();
   load();
 })();

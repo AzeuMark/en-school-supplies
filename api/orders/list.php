@@ -12,6 +12,9 @@ $page     = max(1, (int)($_GET['page'] ?? 1));
 $per_page = 15;
 $status   = (string)($_GET['status'] ?? '');
 $q        = trim((string)($_GET['q'] ?? ''));
+$order_type = (string)($_GET['order_type'] ?? 'all'); // all | guest | registered
+$date_filter = (string)($_GET['date_filter'] ?? 'all'); // all | today | week | month
+$sort = (string)($_GET['sort'] ?? 'newest'); // newest | oldest | total_desc | total_asc | code_asc | code_desc | customer_asc | customer_desc
 
 $where  = [];
 $params = [];
@@ -26,6 +29,21 @@ if ($status !== '' && in_array($status, ['pending', 'ready', 'claimed', 'cancell
     $where[]  = 'o.status = ?';
     $params[] = $status;
 }
+
+if ($order_type === 'guest') {
+    $where[] = 'o.user_id IS NULL';
+} elseif ($order_type === 'registered') {
+    $where[] = 'o.user_id IS NOT NULL';
+}
+
+if ($date_filter === 'today') {
+    $where[] = 'DATE(o.created_at) = CURDATE()';
+} elseif ($date_filter === 'week') {
+    $where[] = 'o.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)';
+} elseif ($date_filter === 'month') {
+    $where[] = 'o.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)';
+}
+
 if ($q !== '') {
     $where[]  = "(
         o.order_code LIKE ?
@@ -76,11 +94,23 @@ $total_pages = max(1, (int)ceil($total / $per_page));
 $page = min($page, $total_pages);
 $offset = ($page - 1) * $per_page;
 
+$sort_map = [
+    'newest'       => 'o.created_at DESC, o.id DESC',
+    'oldest'       => 'o.created_at ASC, o.id ASC',
+    'total_desc'   => 'o.total_price DESC, o.created_at DESC',
+    'total_asc'    => 'o.total_price ASC, o.created_at DESC',
+    'code_asc'     => 'o.order_code ASC, o.created_at DESC',
+    'code_desc'    => 'o.order_code DESC, o.created_at DESC',
+    'customer_asc' => "COALESCE(NULLIF(u.full_name, ''), NULLIF(o.guest_name, ''), 'Guest') ASC, o.created_at DESC",
+    'customer_desc'=> "COALESCE(NULLIF(u.full_name, ''), NULLIF(o.guest_name, ''), 'Guest') DESC, o.created_at DESC",
+];
+$order_by = $sort_map[$sort] ?? $sort_map['newest'];
+
 $sql = "SELECT o.*, u.full_name AS customer_name
         FROM orders o
         LEFT JOIN users u ON u.id = o.user_id
         $sql_where
-        ORDER BY o.created_at DESC
+    ORDER BY $order_by
         LIMIT $per_page OFFSET $offset";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -121,4 +151,11 @@ json_response([
     'total'       => $total,
     'total_pages' => $total_pages,
     'role'        => $role,
+    'filters'     => [
+        'status' => $status,
+        'order_type' => $order_type,
+        'date_filter' => $date_filter,
+        'q' => $q,
+    ],
+    'sort'        => $sort,
 ]);
