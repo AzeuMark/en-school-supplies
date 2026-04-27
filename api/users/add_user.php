@@ -25,7 +25,6 @@ if ($full_name === '') $errors[] = 'Name is required.';
 if (!valid_username($username)) $errors[] = 'Username is required and must use letters, numbers, or underscores.';
 if (!valid_email($email)) $errors[] = 'Valid email required.';
 if ($phone === '') $errors[] = 'Phone required.';
-if (strlen($password) < 4 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) $errors[] = 'Password must be 4+ chars with letters and numbers.';
 if (!in_array($role, ['staff', 'customer'], true)) $errors[] = 'Role must be staff or customer.';
 
 $stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ?");

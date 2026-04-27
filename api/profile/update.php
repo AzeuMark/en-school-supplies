@@ -59,8 +59,6 @@ if ($change_pass) {
     $stmt->execute([$uid]);
     $cur_db = $stmt->fetchColumn();
     if (!hash_equals(aes_decrypt($cur_db), $cur_pass)) $errors[] = 'Current password is incorrect.';
-    if (strlen($new_pass) < 4) $errors[] = 'New password must be at least 4 characters.';
-    if (!preg_match('/[A-Za-z]/', $new_pass) || !preg_match('/[0-9]/', $new_pass)) $errors[] = 'New password must contain letters and numbers.';
     if ($new_pass !== $new_pass2) $errors[] = 'New passwords do not match.';
 }
 

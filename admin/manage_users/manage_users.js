@@ -114,6 +114,21 @@
       footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button>
                <button class="btn" data-save-add>Add User</button>`,
     });
+
+    // Role switch event listeners
+    const roleSwitch = bd.querySelector('[data-role-switch]');
+    if (roleSwitch) {
+      const roleBtns = roleSwitch.querySelectorAll('[data-role]');
+      const roleInput = roleSwitch.querySelector('[data-f="role"]');
+      roleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          roleBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (roleInput) roleInput.value = btn.dataset.role;
+        });
+      });
+    }
+
     bd.querySelector('[data-save-add]').addEventListener('click', async () => {
       const body = readForm(bd);
       try { await EN.api('/api/users/add_user.php', { body }); Modal.close(bd); EN.toast('User created.', 'success'); load(); } catch (_) {}
@@ -130,6 +145,21 @@
         footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button>
                  <button class="btn" data-save-edit>Save Changes</button>`,
       });
+
+      // Role switch event listeners for edit modal
+      const roleSwitch = bd.querySelector('[data-role-switch]');
+      if (roleSwitch) {
+        const roleBtns = roleSwitch.querySelectorAll('[data-role]');
+        const roleInput = roleSwitch.querySelector('[data-f="role"]');
+        roleBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            roleBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (roleInput) roleInput.value = btn.dataset.role;
+          });
+        });
+      }
+
       bd.querySelector('[data-save-edit]').addEventListener('click', async () => {
         const body = readForm(bd, true);
         body.id = u.id;
@@ -179,21 +209,23 @@
   });
 
   function userFormHtml(u = {}, edit = false) {
+    const isStaff = u.role === 'staff';
+    const isCustomer = u.role === 'customer' || (!edit && !u.role);
     return `
-      <div class="field"><label>Username</label><input class="input" data-f="username" required maxlength="50" value="${EN.escapeHtml(u.username||'')}"><div class="field-help">3-50 characters. Letters, numbers, and underscores only.</div></div>
       <div class="field"><label>Full Name</label><input class="input" data-f="full_name" required maxlength="150" value="${EN.escapeHtml(u.full_name||'')}"></div>
       <div class="field"><label>Email</label><input class="input" data-f="email" type="email" required maxlength="150" value="${EN.escapeHtml(u.email||'')}"></div>
       <div class="field"><label>Phone</label><input class="input" data-f="phone" required maxlength="20" value="${EN.escapeHtml(u.phone||'')}"></div>
+      <div class="field"><label>Username</label><input class="input" data-f="username" required maxlength="50" value="${EN.escapeHtml(u.username||'')}"><div class="field-help">3-50 characters. Letters, numbers, and underscores only.</div></div>
       <div class="field"><label>Role</label>
-        <select class="select-native" data-f="role" required>
-          ${edit && u.role === 'admin' ? '<option value="admin" selected>Admin</option>' : ''}
-          <option value="staff" ${u.role==='staff'?'selected':''}>Staff</option>
-          <option value="customer" ${u.role==='customer'?'selected':''}>Customer</option>
-        </select>
+        <div class="role-switch" data-role-switch>
+          ${edit && u.role === 'admin' ? '<input type="hidden" data-f="role" value="admin"><div class="role-badge role-admin">Admin</div>' : `
+          <button type="button" class="role-btn ${isStaff ? 'active' : ''}" data-role="staff">Staff</button>
+          <button type="button" class="role-btn ${isCustomer ? 'active' : ''}" data-role="customer">Customer</button>
+          <input type="hidden" data-f="role" value="${u.role || 'customer'}">`}
+        </div>
       </div>
       <div class="field"><label>Password ${edit?'<span class="text-muted">(leave blank to keep)</span>':''}</label>
-        <input class="input" data-f="password" type="password" ${edit?'':'required minlength="4"'}>
-        <div class="field-help">Min 4 chars with letters and numbers.</div>
+        <input class="input" data-f="password" type="password" ${edit?'':'required'}>
       </div>`;
   }
   function readForm(bd, edit = false) {

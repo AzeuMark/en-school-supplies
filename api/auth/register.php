@@ -21,7 +21,6 @@ if ($full_name === '' || mb_strlen($full_name) > 150) $errors[] = 'Full name is 
 if (!valid_username($username))                     $errors[] = 'Username must be 3-50 characters and use letters, numbers, or underscores.';
 if (!valid_email($email))                              $errors[] = 'A valid email is required.';
 if ($phone === '' || mb_strlen($phone) > 20)           $errors[] = 'Phone is required.';
-if (strlen($pass) < 4)                                 $errors[] = 'Password must be at least 4 characters.';
 if ($pass !== $pass2)                                  $errors[] = 'Passwords do not match.';
 
 // Email uniqueness
