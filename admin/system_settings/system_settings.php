@@ -40,7 +40,13 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
   <div class="settings-grid">
     <!-- Store info -->
     <div class="card">
-      <h3 class="card-title mb-4">Store Information</h3>
+      <div class="ss-card-header">
+        <span class="ss-icon">🏡</span>
+        <div>
+          <h3 class="card-title">Store Information</h3>
+          <p class="card-subtitle">Branding, contact, and regional settings</p>
+        </div>
+      </div>
       <div class="field">
         <label>Website Logo</label>
         <div class="logo-upload">
@@ -114,7 +120,13 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
 
     <!-- System -->
     <div class="card">
-      <h3 class="card-title mb-4">System</h3>
+      <div class="ss-card-header">
+        <span class="ss-icon">⚙️</span>
+        <div>
+          <h3 class="card-title">System</h3>
+          <p class="card-subtitle">Server, session, and operational settings</p>
+        </div>
+      </div>
       <div class="field">
         <label>System Status</label>
         <select class="select-native" name="system_status" data-custom-select>
@@ -131,23 +143,38 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
 
     <!-- Toggles -->
     <div class="card">
-      <h3 class="card-title mb-4">Feature Toggles</h3>
+      <div class="ss-card-header">
+        <span class="ss-icon">🎛️</span>
+        <div>
+          <h3 class="card-title">Feature Toggles</h3>
+          <p class="card-subtitle">Enable or disable platform-wide features</p>
+        </div>
+      </div>
       <div class="toggle-row">
-        <div><strong>Force Dark Mode</strong><div class="field-help">Force dark theme for all users.</div></div>
+        <div class="toggle-label">
+          <span class="toggle-icon">🌙</span>
+          <div><strong>Force Dark Mode</strong><div class="field-help">Force dark theme for all users.</div></div>
+        </div>
         <label class="toggle"><input type="checkbox" name="force_dark" value="1" <?= $s['force_dark']==='1'?'checked':'' ?>><span class="slider"></span></label>
       </div>
       <div class="toggle-row">
-        <div><strong>Disable No-Login Orders</strong><div class="field-help">Require login to place orders (disables kiosk).</div></div>
+        <div class="toggle-label">
+          <span class="toggle-icon">🔐</span>
+          <div><strong>Disable No-Login Orders</strong><div class="field-help">Require login to place orders (disables kiosk).</div></div>
+        </div>
         <label class="toggle"><input type="checkbox" name="disable_no_login_orders" value="1" <?= $s['disable_no_login_orders']==='1'?'checked':'' ?>><span class="slider"></span></label>
       </div>
       <div class="toggle-row">
-        <div><strong>Online Payment</strong><div class="field-help">Show the online payment option during checkout.</div></div>
+        <div class="toggle-label">
+          <span class="toggle-icon">💳</span>
+          <div><strong>Online Payment</strong><div class="field-help">Show the online payment option during checkout.</div></div>
+        </div>
         <label class="toggle"><input type="checkbox" name="online_payment" value="1" <?= $s['online_payment']==='1'?'checked':'' ?>><span class="slider"></span></label>
       </div>
     </div>
   </div>
 
-  <div class="mt-5">
+  <div class="settings-save-bar">
     <button type="submit" class="btn btn-lg">Save Settings</button>
   </div>
 </form>
