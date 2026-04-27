@@ -30,7 +30,10 @@ $logo_display_path = '/' . ltrim($s['logo_path'], '/');
 $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_display_path) : null;
 ?>
 <div class="page-header">
-  <h1>System Settings</h1>
+  <div class="page-header-main">
+    <h1>System Settings</h1>
+    <p class="page-subtitle">Configure branding, operations, and platform behavior across the whole system.</p>
+  </div>
 </div>
 
 <form id="settings-form" enctype="multipart/form-data">

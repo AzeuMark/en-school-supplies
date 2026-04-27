@@ -1,6 +1,43 @@
 /* Staff profile page (uses shared profile_content.php) */
+/* Staff profile page */
+
+.profile-save-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+}
+
+.profile-save-floating {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+  margin: 0;
+}
+
+.profile-save-floating .btn {
+  box-shadow: var(--shadow-lg);
+  animation: profileSaveSlide 0.25s ease;
+}
+
+.profile-save-floating .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes profileSaveSlide {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @media (max-width: 768px) {
   .app-main > div[style*="grid-template-columns:280px"] {
     grid-template-columns: 1fr !important;
+  }
+
+  .profile-save-floating {
+    right: 16px;
+    bottom: 16px;
   }
 }

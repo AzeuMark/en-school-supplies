@@ -10,7 +10,10 @@ $PAGE_CSS     = '/staff/manage_orders/manage_orders.css';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Manage Orders</h1>
+  <div class="page-header-main">
+    <h1>Manage Orders</h1>
+    <p class="page-subtitle">Handle fulfillment, PIN verification, and customer pickups in real time.</p>
+  </div>
 </div>
 
 <div class="status-tabs" data-status-tabs>

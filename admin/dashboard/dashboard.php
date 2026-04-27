@@ -28,7 +28,10 @@ $PAGE_CSS     = '/admin/dashboard/dashboard.css';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Welcome back, <?= e(explode(' ', $me['full_name'])[0]) ?>! 👋</h1>
+  <div class="page-header-main">
+    <h1>Welcome back, <?= e(explode(' ', $me['full_name'])[0]) ?>! 👋</h1>
+    <p class="page-subtitle">Check your store's key numbers and jump to critical admin actions quickly.</p>
+  </div>
 </div>
 
 <!-- Stats grid -->

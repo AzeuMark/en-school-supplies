@@ -29,7 +29,10 @@ $PAGE_CSS     = '/staff/dashboard/dashboard.css';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Welcome, <?= e(explode(' ', $me['full_name'])[0]) ?>! 👋</h1>
+  <div class="page-header-main">
+    <h1>Welcome, <?= e(explode(' ', $me['full_name'])[0]) ?>! 👋</h1>
+    <p class="page-subtitle">View current workload and process customer orders efficiently.</p>
+  </div>
 </div>
 
 <div class="stats-grid">

@@ -12,7 +12,10 @@ $PAGE_CSS     = '/admin/manage_users/manage_users.css';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Manage Users</h1>
+  <div class="page-header-main">
+    <h1>Manage Users</h1>
+    <p class="page-subtitle">Review users, approve pending accounts, and manage flagged accounts.</p>
+  </div>
   <button class="btn" data-add-user>+ Add User</button>
 </div>
 

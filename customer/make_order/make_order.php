@@ -14,7 +14,10 @@ $EXTRA_CSS    = ['/assets/css/cart-drawer.css'];
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Browse & Order</h1>
+  <div class="page-header-main">
+    <h1>Browse & Order</h1>
+    <p class="page-subtitle">Find school supplies fast, add items to cart, and place your order securely.</p>
+  </div>
 </div>
 
 <div class="toolbar">

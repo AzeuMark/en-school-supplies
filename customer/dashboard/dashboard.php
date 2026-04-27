@@ -31,7 +31,10 @@ $PAGE_CSS     = '/customer/dashboard/dashboard.css';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Welcome, <?= e(explode(' ', $me['full_name'])[0]) ?>! 👋</h1>
+  <div class="page-header-main">
+    <h1>Welcome, <?= e(explode(' ', $me['full_name'])[0]) ?>! 👋</h1>
+    <p class="page-subtitle">Review your orders, spending, and next shopping actions at a glance.</p>
+  </div>
 </div>
 
 <div class="stats-grid">

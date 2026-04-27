@@ -318,8 +318,23 @@
 .app-shell.sidebar-open .app-main {
   pointer-events: none;
 }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); flex-wrap: wrap; gap: 12px; }
-.page-header h1 { margin: 0; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); gap: 24px; }
+.page-header-main { flex: 1 1 auto; min-width: 0; }
+.page-header-main h1 { margin: 0; }
+.page-header-main .page-subtitle,
+.page-header > .page-subtitle {
+  margin: 4px 0 0;
+  max-width: 680px;
+  color: var(--text-muted);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+.page-header > .btn,
+.page-header > .flex,
+.page-header > .inventory-page-actions,
+.page-header > .page-actions {
+  flex-shrink: 0;
+}
 
 /* Mobile */
 @media (max-width: 768px) {

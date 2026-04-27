@@ -10,12 +10,13 @@ $default_names = $pdo->query("SELECT item_name FROM default_item_names ORDER BY 
 $PAGE_TITLE   = 'Inventory';
 $CURRENT_PAGE = 'inventory';
 $PAGE_CSS     = '/admin/inventory/inventory.css';
+$PAGE_SUBTITLE = 'Manage items, stock levels, and categories in one place.';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
-<div class="page-header inventory-page-header">
-  <div>
+<div class="page-header">
+  <div class="page-header-main">
     <h1>Inventory</h1>
-    <p class="text-muted inventory-page-subtitle">Manage items, stock levels, and categories in one place.</p>
+    <p class="page-subtitle">Manage items, stock levels, and categories in one place.</p>
   </div>
   <div class="flex gap-2 inventory-page-actions">
     <button class="btn btn-secondary" data-manage-categories>📁 Categories</button>

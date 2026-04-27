@@ -1,14 +1,4 @@
 /* Inventory — admin */
-.inventory-page-header {
-  margin-bottom: 18px;
-  gap: 16px;
-}
-
-.inventory-page-subtitle {
-  margin: 6px 0 0;
-  max-width: 680px;
-}
-
 .inventory-page-actions {
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -64,7 +54,20 @@
 }
 
 .inventory-control-search .search-box {
+  position: relative;
   min-width: 0;
+}
+
+.inventory-control-search .search-box::before {
+  content: "🔍";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.inventory-control-search .search-box .input {
+  padding-left: 36px;
 }
 
 .inventory-filter-summary {

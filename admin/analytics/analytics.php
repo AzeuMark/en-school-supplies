@@ -48,7 +48,10 @@ $total_items  = (int)$pdo->query("SELECT COUNT(*) FROM inventory")->fetchColumn(
 $total_customers = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='customer' AND status='active'")->fetchColumn();
 ?>
 <div class="page-header">
-  <h1>Analytics</h1>
+  <div class="page-header-main">
+    <h1>Analytics</h1>
+    <p class="page-subtitle">Monitor sales trends, demand signals, and category performance.</p>
+  </div>
 </div>
 
 <div class="stats-grid">

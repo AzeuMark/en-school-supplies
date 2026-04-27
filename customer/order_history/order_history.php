@@ -10,7 +10,10 @@ $PAGE_CSS     = '/customer/order_history/order_history.css';
 include __DIR__ . '/../../includes/layout_header.php';
 ?>
 <div class="page-header">
-  <h1>Order History</h1>
+  <div class="page-header-main">
+    <h1>Order History</h1>
+    <p class="page-subtitle">Track every order status and manage eligible cancellations from one timeline.</p>
+  </div>
 </div>
 
 <div class="status-tabs" data-status-tabs>
