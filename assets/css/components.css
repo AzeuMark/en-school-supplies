@@ -248,6 +248,7 @@
   border: 1px solid var(--border); border-radius: var(--radius-md);
   background: var(--surface); color: var(--text); text-align: left;
   cursor: pointer; position: relative;
+  display: flex; align-items: center; gap: 8px;
 }
 .custom-select .cs-trigger::after {
   content: ""; position: absolute; right: 14px; top: 50%; transform: translateY(-50%) rotate(45deg);
@@ -258,9 +259,17 @@
 .custom-select .cs-options {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-  max-height: 240px; overflow-y: auto; box-shadow: var(--shadow-md);
+  max-height: 280px; overflow-y: auto; box-shadow: var(--shadow-md);
   display: none;
 }
 .custom-select.open .cs-options { display: block; }
-.custom-select .cs-option { padding: 10px 12px; cursor: pointer; }
+.custom-select .cs-option { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .custom-select .cs-option:hover, .custom-select .cs-option.active { background: var(--bg); color: var(--primary); }
+.custom-select .cs-group { border-bottom: 1px solid var(--border); }
+.custom-select .cs-group:last-child { border-bottom: none; }
+.custom-select .cs-group-label {
+  padding: 8px 12px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-muted); background: var(--bg);
+}
+.custom-select .cs-emoji { font-size: 1.25rem; line-height: 1; }
+.custom-select .cs-icon { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; }

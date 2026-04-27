@@ -57,14 +57,46 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
       <div class="field"><label>Store Name</label><input class="input" name="store_name" value="<?= e($s['store_name']) ?>" required maxlength="100"><div class="field-help">Shown in the navbar, sidebar, login page, and receipts.</div></div>
       <div class="field"><label>Phone</label><input class="input" name="store_phone" value="<?= e($s['store_phone']) ?>" maxlength="20"></div>
       <div class="field"><label>Email</label><input class="input" name="store_email" type="email" value="<?= e($s['store_email']) ?>" maxlength="100"></div>
-      <div class="field"><label>Timezone</label><input class="input" name="timezone" value="<?= e($s['timezone']) ?>" maxlength="50"><div class="field-help">Controls the date and time shown throughout the system.</div></div>
+      <div class="field">
+        <label>Timezone</label>
+        <select class="select-native" name="timezone" data-custom-select>
+          <?php
+          function tz_country_code($tz) {
+            $map = [
+              'Asia/Manila'=>'ph', 'Asia/Singapore'=>'sg', 'Asia/Tokyo'=>'jp', 'Asia/Seoul'=>'kr', 'Asia/Shanghai'=>'cn',
+              'Asia/Hong_Kong'=>'hk', 'Asia/Bangkok'=>'th', 'Asia/Jakarta'=>'id', 'Asia/Kuala_Lumpur'=>'my', 'Asia/Ho_Chi_Minh'=>'vn',
+              'Asia/Dubai'=>'ae', 'Asia/Calcutta'=>'in', 'America/New_York'=>'us', 'America/Los_Angeles'=>'us', 'America/Chicago'=>'us',
+              'America/Denver'=>'us', 'America/Toronto'=>'ca', 'America/Vancouver'=>'ca', 'America/Mexico_City'=>'mx',
+              'America/Sao_Paulo'=>'br', 'America/Argentina/Buenos_Aires'=>'ar', 'Europe/London'=>'gb', 'Europe/Paris'=>'fr',
+              'Europe/Berlin'=>'de', 'Europe/Madrid'=>'es', 'Europe/Rome'=>'it', 'Europe/Amsterdam'=>'nl', 'Europe/Brussels'=>'be',
+              'Europe/Zurich'=>'ch', 'Europe/Vienna'=>'at', 'Europe/Stockholm'=>'se', 'Europe/Oslo'=>'no', 'Europe/Copenhagen'=>'dk',
+              'Europe/Warsaw'=>'pl', 'Europe/Moscow'=>'ru', 'Australia/Sydney'=>'au', 'Australia/Melbourne'=>'au',
+              'Australia/Brisbane'=>'au', 'Australia/Perth'=>'au', 'Pacific/Auckland'=>'nz', 'Pacific/Fiji'=>'fj',
+              'Africa/Cairo'=>'eg', 'Africa/Johannesburg'=>'za', 'Africa/Lagos'=>'ng', 'Africa/Nairobi'=>'ke', 'Asia/Riyadh'=>'sa',
+              'Asia/Jerusalem'=>'il', 'Asia/Tehran'=>'ir', 'Asia/Baghdad'=>'iq', 'Pacific/Honolulu'=>'us', 'Pacific/Guam'=>'gu',
+              'Pacific/Samoa'=>'ws', 'Pacific/Tahiti'=>'pf',
+            ];
+            return $map[$tz] ?? '';
+          }
+          ?>
+          <?php foreach (timezone_options() as $region => $zones): ?>
+            <optgroup label="<?= e($region) ?>">
+              <?php foreach ($zones as $tz => $label): ?>
+                <?php $cc = tz_country_code($tz); ?>
+                <option value="<?= e($tz) ?>" <?= $cc ? 'data-icon="' . e(url('/assets/images/country_flags/' . $cc . '.png')) . '"' : '' ?> <?= $s['timezone'] === $tz ? 'selected' : '' ?>><?= e($label) ?></option>
+              <?php endforeach; ?>
+            </optgroup>
+          <?php endforeach; ?>
+        </select>
+        <div class="field-help">Controls the date and time shown throughout the system.</div>
+      </div>
       <div class="field">
         <label>Navbar Country Flag</label>
-        <select class="select-native" name="navbar_country_flag">
+        <select class="select-native" name="navbar_country_flag" data-custom-select>
           <?php foreach (navbar_country_flag_options() as $group => $countries): ?>
             <optgroup label="<?= e($group) ?>">
               <?php foreach ($countries as $code => $label): ?>
-                <option value="<?= e($code) ?>" <?= $s['navbar_country_flag'] === $code ? 'selected' : '' ?>><?= e($label) ?> (<?= e(navbar_country_flag_emoji($code)) ?>)</option>
+                <option value="<?= e($code) ?>" data-icon="<?= e(url('/assets/images/country_flags/' . strtolower($code) . '.png')) ?>" <?= $s['navbar_country_flag'] === $code ? 'selected' : '' ?>><?= e($label) ?></option>
               <?php endforeach; ?>
             </optgroup>
           <?php endforeach; ?>
@@ -78,10 +110,10 @@ $logo_display_url = file_exists(APP_ROOT . $logo_display_path) ? url($logo_displ
       <h3 class="card-title mb-4">System</h3>
       <div class="field">
         <label>System Status</label>
-        <select class="select-native" name="system_status">
-          <option value="online" <?= $s['system_status']==='online'?'selected':'' ?>>Online</option>
-          <option value="maintenance" <?= $s['system_status']==='maintenance'?'selected':'' ?>>Maintenance</option>
-          <option value="offline" <?= $s['system_status']==='offline'?'selected':'' ?>>Offline</option>
+        <select class="select-native" name="system_status" data-custom-select>
+          <option value="online" data-emoji="🟢" <?= $s['system_status']==='online'?'selected':'' ?>>Online</option>
+          <option value="maintenance" data-emoji="🟡" <?= $s['system_status']==='maintenance'?'selected':'' ?>>Maintenance</option>
+          <option value="offline" data-emoji="🔴" <?= $s['system_status']==='offline'?'selected':'' ?>>Offline</option>
         </select>
         <div class="field-help">When offline, only admins can log in. Maintenance allows staff too.</div>
       </div>

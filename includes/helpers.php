@@ -63,7 +63,7 @@ function normalize_login_identifier($identifier) {
 function navbar_country_flag_options() {
     return [
         'Asia' => [
-            'PH' => 'Philippines',
+            'PH' => 'Philippines — Default',
             'SG' => 'Singapore',
             'JP' => 'Japan',
             'KR' => 'South Korea',
@@ -117,6 +117,76 @@ function navbar_country_flag_label($code) {
     $map = navbar_country_flag_map();
     $code = navbar_country_flag_code($code);
     return $map[$code] ?? $map['PH'];
+}
+
+function timezone_options() {
+    return [
+        'Asia' => [
+            'Asia/Manila' => 'Philippines (Manila) — Default',
+            'Asia/Singapore' => 'Singapore',
+            'Asia/Tokyo' => 'Japan (Tokyo)',
+            'Asia/Seoul' => 'South Korea (Seoul)',
+            'Asia/Shanghai' => 'China (Shanghai)',
+            'Asia/Hong_Kong' => 'Hong Kong',
+            'Asia/Bangkok' => 'Thailand (Bangkok)',
+            'Asia/Jakarta' => 'Indonesia (Jakarta)',
+            'Asia/Kuala_Lumpur' => 'Malaysia (Kuala Lumpur)',
+            'Asia/Ho_Chi_Minh' => 'Vietnam (Ho Chi Minh)',
+            'Asia/Dubai' => 'UAE (Dubai)',
+            'Asia/Calcutta' => 'India (Kolkata)',
+        ],
+        'Americas' => [
+            'America/New_York' => 'United States (New York)',
+            'America/Los_Angeles' => 'United States (Los Angeles)',
+            'America/Chicago' => 'United States (Chicago)',
+            'America/Denver' => 'United States (Denver)',
+            'America/Toronto' => 'Canada (Toronto)',
+            'America/Vancouver' => 'Canada (Vancouver)',
+            'America/Mexico_City' => 'Mexico (Mexico City)',
+            'America/Sao_Paulo' => 'Brazil (Sao Paulo)',
+            'America/Argentina/Buenos_Aires' => 'Argentina (Buenos Aires)',
+        ],
+        'Europe' => [
+            'Europe/London' => 'United Kingdom (London)',
+            'Europe/Paris' => 'France (Paris)',
+            'Europe/Berlin' => 'Germany (Berlin)',
+            'Europe/Madrid' => 'Spain (Madrid)',
+            'Europe/Rome' => 'Italy (Rome)',
+            'Europe/Amsterdam' => 'Netherlands (Amsterdam)',
+            'Europe/Brussels' => 'Belgium (Brussels)',
+            'Europe/Zurich' => 'Switzerland (Zurich)',
+            'Europe/Vienna' => 'Austria (Vienna)',
+            'Europe/Stockholm' => 'Sweden (Stockholm)',
+            'Europe/Oslo' => 'Norway (Oslo)',
+            'Europe/Copenhagen' => 'Denmark (Copenhagen)',
+            'Europe/Warsaw' => 'Poland (Warsaw)',
+            'Europe/Moscow' => 'Russia (Moscow)',
+        ],
+        'Oceania' => [
+            'Australia/Sydney' => 'Australia (Sydney)',
+            'Australia/Melbourne' => 'Australia (Melbourne)',
+            'Australia/Brisbane' => 'Australia (Brisbane)',
+            'Australia/Perth' => 'Australia (Perth)',
+            'Pacific/Auckland' => 'New Zealand (Auckland)',
+            'Pacific/Fiji' => 'Fiji',
+        ],
+        'Middle East & Africa' => [
+            'Africa/Cairo' => 'Egypt (Cairo)',
+            'Africa/Johannesburg' => 'South Africa (Johannesburg)',
+            'Africa/Lagos' => 'Nigeria (Lagos)',
+            'Africa/Nairobi' => 'Kenya (Nairobi)',
+            'Asia/Riyadh' => 'Saudi Arabia (Riyadh)',
+            'Asia/Jerusalem' => 'Israel (Jerusalem)',
+            'Asia/Tehran' => 'Iran (Tehran)',
+            'Asia/Baghdad' => 'Iraq (Baghdad)',
+        ],
+        'Pacific' => [
+            'Pacific/Honolulu' => 'Hawaii (Honolulu)',
+            'Pacific/Guam' => 'Guam',
+            'Pacific/Samoa' => 'Samoa',
+            'Pacific/Tahiti' => 'Tahiti',
+        ],
+    ];
 }
 
 function navbar_country_flag_emoji($code) {
