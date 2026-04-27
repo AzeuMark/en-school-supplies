@@ -17,6 +17,7 @@ $reason = sanitize($body['reason'] ?? '');
 
 if ($id <= 0) json_response(['ok' => false, 'error' => 'Invalid user.'], 400);
 if ($reason === '') json_response(['ok' => false, 'error' => 'Flag reason is required.'], 400);
+if (mb_strlen($reason) > 50) json_response(['ok' => false, 'error' => 'Flag reason must be 50 characters or less.'], 400);
 if ($id === (int)$_SESSION['user']['id']) json_response(['ok' => false, 'error' => 'You cannot flag your own account.'], 400);
 
 $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");

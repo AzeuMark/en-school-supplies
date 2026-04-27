@@ -61,6 +61,40 @@
   cursor: help;
 }
 
+.action-unflag-btn {
+  background: rgba(25, 118, 210, 0.14);
+  color: var(--info);
+  border-color: rgba(25, 118, 210, 0.35);
+}
+
+.action-unflag-btn:hover {
+  background: rgba(25, 118, 210, 0.22);
+}
+
+.flag-slash-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.flag-slash-icon::after {
+  content: '/';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: currentColor;
+  pointer-events: none;
+}
+
 /* Users filter card (matching manage_orders design) */
 .users-filters {
   margin-bottom: var(--space-4);

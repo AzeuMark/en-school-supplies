@@ -77,10 +77,11 @@
   function render(users) {
     if (!users.length) { tbl.innerHTML = '<div class="empty-state"><div class="es-icon">👥</div><div class="es-title">No users found</div></div>'; return; }
     tbl.innerHTML = `<div class="table-wrap"><table class="table">
-      <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
+      <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         ${users.map(u => {
           const isSelf = u.id === currentAdminId;
+          const safeReason = EN.escapeHtml(u.flag_reason || 'No reason provided');
           return `
           <tr>
             <td>#${u.id}</td>
@@ -90,14 +91,13 @@
             <td>${EN.escapeHtml(u.phone)}</td>
             <td><span class="badge">${u.role}</span></td>
             <td><span class="badge status-${u.status}">${u.status}</span></td>
-            <td>${u.status === 'flagged' ? `<span class="text-muted">${EN.escapeHtml(u.flag_reason || 'No reason provided')}</span>` : (u.status === 'pending' ? '<span class="text-muted">Awaiting approval</span>' : '<span class="text-muted">—</span>')}</td>
             <td><div class="actions">
               ${isSelf
                 ? '<span class="badge badge-info action-protected" title="You cannot edit your own account from this page">🔒 Protected</span>'
                 : `<button class="btn btn-sm btn-secondary" data-edit='${JSON.stringify(u).replace(/'/g,"&#39;")}' title="Edit">✏️</button>`
               }
               ${!isSelf && u.status === 'pending' ? `<button class="btn btn-sm" data-approve="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Approve">✓ Approve</button>` : ''}
-              ${!isSelf && u.role !== 'admin' && u.status === 'flagged' ? `<button class="btn btn-sm" data-unflag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Unflag">↺ Unflag</button>` : ''}
+              ${!isSelf && u.role !== 'admin' && u.status === 'flagged' ? `<button class="btn btn-sm btn-icon action-unflag-btn" data-unflag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" data-reason="${safeReason}" title="Unflag user" aria-label="Unflag user"><span class="flag-slash-icon" aria-hidden="true">🚩</span></button>` : ''}
               ${!isSelf && u.role !== 'admin' && u.status !== 'flagged' ? `<button class="btn btn-sm btn-warning" data-flag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Flag">🚩</button>` : ''}
               ${!isSelf && u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" data-del="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Delete">🗑️</button>` : ''}
             </div></td>
@@ -174,13 +174,24 @@
       const bd = Modal.show({
         title: `Flag ${name}?`,
         html: `<p class="text-muted">The user will be blocked from logging in. Provide a reason:</p>
-               <textarea class="textarea" id="flag-reason" required placeholder="Reason for flagging..."></textarea>`,
+               <textarea class="textarea" id="flag-reason" required maxlength="50" placeholder="Reason for flagging..."></textarea>
+               <div class="field-help" id="flag-reason-counter">0 / 50 characters</div>`,
         footer: `<button class="btn btn-secondary" data-modal-close>Cancel</button>
                  <button class="btn btn-warning" data-confirm-flag>Flag User</button>`,
       });
+
+      const reasonInput = bd.querySelector('#flag-reason');
+      const reasonCounter = bd.querySelector('#flag-reason-counter');
+      const syncCounter = () => {
+        if (!reasonInput || !reasonCounter) return;
+        reasonCounter.textContent = `${reasonInput.value.length} / 50 characters`;
+      };
+      if (reasonInput) reasonInput.addEventListener('input', syncCounter);
+
       bd.querySelector('[data-confirm-flag]').addEventListener('click', async () => {
-        const reason = bd.querySelector('#flag-reason').value.trim();
+        const reason = reasonInput.value.trim();
         if (!reason) { EN.toast('Please enter a reason.', 'error'); return; }
+        if (reason.length > 50) { EN.toast('Flag reason must be 50 characters or less.', 'error'); return; }
         try { await EN.api('/api/users/flag_user.php', { body: { id, reason } }); Modal.close(bd); EN.toast('User flagged.', 'success'); load(); } catch (_) {}
       });
       return;
@@ -194,9 +205,26 @@
     }
     const uf = e.target.closest('[data-unflag]');
     if (uf) {
-      const ok = await Modal.confirm({ title: 'Unflag user?', message: `Reactivate ${uf.dataset.name}?`, confirmText: 'Unflag' });
-      if (!ok) return;
-      try { await EN.api('/api/users/unflag_user.php', { body: { id: +uf.dataset.unflag } }); EN.toast('User unflagged.', 'success'); load(); } catch (_) {}
+      const id = +uf.dataset.unflag;
+      const name = uf.dataset.name;
+      const reason = uf.dataset.reason || 'No reason provided';
+      const bd = Modal.show({
+        title: `Unflag ${name}?`,
+        html: `<p class="text-muted">Flag reason:</p>
+               <div class="card" style="padding:12px;background:var(--bg)">${EN.escapeHtml(reason)}</div>
+               <p class="text-muted mt-3">Unflagging will restore this user's access.</p>`,
+        footer: `<button class="btn btn-secondary" data-modal-close>Close</button>
+                 <button class="btn" data-confirm-unflag>Unflag</button>`,
+      });
+
+      bd.querySelector('[data-confirm-unflag]').addEventListener('click', async () => {
+        try {
+          await EN.api('/api/users/unflag_user.php', { body: { id } });
+          Modal.close(bd);
+          EN.toast('User unflagged.', 'success');
+          load();
+        } catch (_) {}
+      });
       return;
     }
     const del = e.target.closest('[data-del]');
