@@ -212,10 +212,6 @@
     const isStaff = u.role === 'staff';
     const isCustomer = u.role === 'customer' || (!edit && !u.role);
     return `
-      <div class="field"><label>Full Name</label><input class="input" data-f="full_name" required maxlength="150" value="${EN.escapeHtml(u.full_name||'')}"></div>
-      <div class="field"><label>Email</label><input class="input" data-f="email" type="email" required maxlength="150" value="${EN.escapeHtml(u.email||'')}"></div>
-      <div class="field"><label>Phone</label><input class="input" data-f="phone" required maxlength="20" value="${EN.escapeHtml(u.phone||'')}"></div>
-      <div class="field"><label>Username</label><input class="input" data-f="username" required maxlength="50" value="${EN.escapeHtml(u.username||'')}"><div class="field-help">3-50 characters. Letters, numbers, and underscores only.</div></div>
       <div class="field"><label>Role</label>
         <div class="role-switch" data-role-switch>
           ${edit && u.role === 'admin' ? '<input type="hidden" data-f="role" value="admin"><div class="role-badge role-admin">Admin</div>' : `
@@ -224,6 +220,10 @@
           <input type="hidden" data-f="role" value="${u.role || 'customer'}">`}
         </div>
       </div>
+      <div class="field"><label>Full Name</label><input class="input" data-f="full_name" required maxlength="150" value="${EN.escapeHtml(u.full_name||'')}"></div>
+      <div class="field"><label>Email</label><input class="input" data-f="email" type="email" required maxlength="150" value="${EN.escapeHtml(u.email||'')}"></div>
+      <div class="field"><label>Phone</label><input class="input" data-f="phone" required maxlength="20" value="${EN.escapeHtml(u.phone||'')}"></div>
+      <div class="field"><label>Username</label><input class="input" data-f="username" required maxlength="50" value="${EN.escapeHtml(u.username||'')}"><div class="field-help">3-50 characters. Letters, numbers, and underscores only.</div></div>
       <div class="field"><label>Password ${edit?'<span class="text-muted">(leave blank to keep)</span>':''}</label>
         <input class="input" data-f="password" type="password" ${edit?'':'required'}>
       </div>`;
