@@ -63,8 +63,8 @@
     applyTheme(next);
     localStorage.setItem('theme', next);
     syncThemeToggle();
-    // best-effort persist to server
-    if (window.EN) {
+    // best-effort persist to server (skipped on pages with data-no-persist)
+    if (window.EN && !btn.hasAttribute('data-no-persist')) {
       window.EN.api('/api/profile/update.php', { body: { theme_preference: next } }).catch(() => {});
     }
   });

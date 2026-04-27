@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/csrf.php';
-require_once __DIR__ . '/../../includes/aes.php';
+require_once __DIR__ . '/../../includes/aes.php'; //
 require_once __DIR__ . '/../../includes/logger.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 
@@ -16,28 +16,30 @@ $phone     = sanitize($_POST['phone'] ?? '');
 $pass      = (string)($_POST['password'] ?? '');
 $pass2     = (string)($_POST['password2'] ?? '');
 
-$errors = [];
-if ($full_name === '' || mb_strlen($full_name) > 150) $errors[] = 'Full name is required.';
-if (!valid_username($username))                     $errors[] = 'Username must be 3-50 characters and use letters, numbers, or underscores.';
-if (!valid_email($email))                              $errors[] = 'A valid email is required.';
-if ($phone === '' || mb_strlen($phone) > 20)           $errors[] = 'Phone is required.';
-if ($pass !== $pass2)                                  $errors[] = 'Passwords do not match.';
+$field_errors = [];
+if ($full_name === '' || mb_strlen($full_name) > 150) $field_errors['full_name'] = 'Full name is required.';
+if (!valid_username($username))                      $field_errors['username']  = 'Must be 3-50 chars, letters/numbers/underscores.';
+if (!valid_email($email))                            $field_errors['email']     = 'A valid email is required.';
+if ($phone === '')                                   $field_errors['phone']     = 'Phone is required.';
+elseif (!preg_match('/^[0-9+\-\s().]{7,20}$/', $phone)) $field_errors['phone'] = 'Use 7–20 digits, spaces, +, -, (, or ).';
+if ($pass !== $pass2)                                $field_errors['password2'] = 'Passwords do not match.';
 
-// Email uniqueness
-if (!$errors) {
+// Email/username uniqueness
+if (!$field_errors) {
     $stmt = $pdo->prepare("SELECT 1 FROM users WHERE email = ? LIMIT 1");
     $stmt->execute([$email]);
-    if ($stmt->fetch()) $errors[] = 'That email is already registered.';
+    if ($stmt->fetch()) $field_errors['email'] = 'That email is already registered.';
 
     $stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ? LIMIT 1");
     $stmt->execute([$username]);
-    if ($stmt->fetch()) $errors[] = 'That username is already taken.';
+    if ($stmt->fetch()) $field_errors['username'] = 'That username is already taken.';
 }
 
-if ($errors) {
-    flash_error(implode(' ', $errors));
+if ($field_errors) {
+    $_SESSION['flash_reg_error']    = implode(' ', $field_errors);
+    $_SESSION['flash_field_errors'] = $field_errors;
     $_SESSION['flash_old'] = compact('full_name', 'username', 'email', 'phone');
-    redirect(url('/register.php'));
+    redirect(url('/login.php?tab=register'));
 }
 
 $stmt = $pdo->prepare(

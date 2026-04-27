@@ -42,6 +42,7 @@ if ($full_name === '' || mb_strlen($full_name) > 150) $errors[] = 'Full name is 
 if (!valid_username($username))                     $errors[] = 'Username must be 3-50 characters and use letters, numbers, or underscores.';
 if (!valid_email($email))                              $errors[] = 'Valid email required.';
 if ($phone === '')                                     $errors[] = 'Phone is required.';
+elseif (!preg_match('/^[0-9+\-\s().]{7,20}$/', $phone)) $errors[] = 'Phone must be 7–20 characters and contain only digits, spaces, +, -, (, or ).';
 
 // Email uniqueness check
 $stmt = $pdo->prepare("SELECT 1 FROM users WHERE email = ? AND id <> ? LIMIT 1");

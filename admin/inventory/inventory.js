@@ -143,7 +143,7 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
         <div class="field"><label>Price (₱)</label><input class="input" name="price" type="number" step="0.01" min="0.01" required value="${it.price || ''}"></div>
-        <div class="field"><label>Stock</label><input class="input" name="stock_count" type="number" min="1" required value="${it.stock_count ?? ''}"><div class="field-help">Must be at least 1 for new items.</div></div>
+        <div class="field"><label>Stock</label><input class="input" name="stock_count" type="number" min="1" required value="${it.stock_count ?? ''}"></div>
         <div class="field"><label>Max/Order</label><input class="input" name="max_order_qty" type="number" min="1" required value="${it.max_order_qty || 10}"></div>
       </div>
       <div class="field">
