@@ -1,0 +1,62 @@
+/* Staff — Pending Users */
+.actions .btn-sm.btn-icon { width: 32px; height: 32px; min-height: 32px; padding: 0; }
+
+.action-approve-btn {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.action-approve-btn:hover {
+  background: #2e7d32;
+  border-color: #2e7d32;
+}
+
+/* Filters card */
+.pu-filters { margin-bottom: var(--space-4); }
+
+.pu-filters-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pu-filters-head h3 { margin: 0; font-size: 1rem; }
+.pu-filters-head p  { margin: 4px 0 0; font-size: 0.8125rem; color: var(--text-muted); }
+
+.pu-toolbar-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) minmax(170px, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.pu-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pu-control > span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pu-control-search .search-box { position: relative; }
+.pu-control-search .search-box::before {
+  content: "🔍";
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+}
+.pu-control-search .search-box .input { padding-left: 36px; }
+
+.pu-filter-summary { margin: 12px 0 0; font-size: 0.8125rem; }
+
+@media (max-width: 768px) {
+  .pu-toolbar-grid { grid-template-columns: 1fr; }
+  .pu-filters-head { flex-direction: column; }
+  .table th:nth-child(1), .table td:nth-child(1) { display: none; }
+}

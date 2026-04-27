@@ -75,6 +75,7 @@ if ($role === 'admin') {
     $sidebar_items = [
         ['key' => 'dashboard',        'label' => 'Dashboard',        'icon' => '🏠', 'href' => url('/staff/dashboard/dashboard.php')],
         ['key' => 'manage_orders',    'label' => 'Manage Orders',    'icon' => '📦', 'href' => url('/staff/manage_orders/manage_orders.php'), 'badge' => 'pending_orders'],
+        ['key' => 'pending_users',    'label' => 'Pending Users',    'icon' => '👤', 'href' => url('/staff/pending_users/pending_users.php'), 'badge' => 'pending_accounts'],
     ];
 } elseif ($role === 'customer') {
     $sidebar_items = [
