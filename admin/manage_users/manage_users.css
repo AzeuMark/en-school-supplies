@@ -1,5 +1,6 @@
 /* Manage Users — admin */
 .actions { flex-wrap: wrap; }
+.actions .btn-sm.btn-icon { width: 32px; height: 32px; min-height: 32px; padding: 0; }
 .table td .text-muted { display: inline-block; max-width: 260px; white-space: normal; }
 
 /* Role Switch - Modern Toggle Buttons */
@@ -61,38 +62,26 @@
   cursor: help;
 }
 
+.action-approve-btn {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+
+.action-approve-btn:hover {
+  background: #2e7d32;
+  border-color: #2e7d32;
+}
+
 .action-unflag-btn {
-  background: rgba(25, 118, 210, 0.14);
-  color: var(--info);
-  border-color: rgba(25, 118, 210, 0.35);
+  background: var(--info);
+  color: #fff;
+  border-color: var(--info);
 }
 
 .action-unflag-btn:hover {
-  background: rgba(25, 118, 210, 0.22);
-}
-
-.flag-slash-icon {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.flag-slash-icon::after {
-  content: '/';
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 15px;
-  color: currentColor;
-  pointer-events: none;
+  background: #1565c0;
+  border-color: #1565c0;
 }
 
 /* Users filter card (matching manage_orders design) */
