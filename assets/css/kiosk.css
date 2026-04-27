@@ -1,51 +1,369 @@
 /* ===== Kiosk full-screen overrides ===== */
 
+/* ---- Body ---- */
 .kiosk-body {
   background: var(--bg);
   min-height: 100vh;
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* ---- Header ---- */
 .kiosk-header {
-  background: var(--primary); color: #fff;
-  padding: 16px 32px;
-  display: flex; align-items: center; gap: 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, #1b5e20 100%);
+  color: #fff;
+  padding: 0 32px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  flex-shrink: 0;
 }
-.kiosk-header img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; background: #fff; }
-.kiosk-header h1 { font-size: 1.5rem; margin: 0; }
-.kiosk-header .ks-tagline { font-size: .875rem; opacity: .9; }
+.kiosk-header .ks-logo-wrap {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+}
+.kiosk-header .ks-logo-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.kiosk-header .ks-brand { display: flex; flex-direction: column; gap: 2px; }
+.kiosk-header h1 { font-size: 1.375rem; margin: 0; font-weight: 800; letter-spacing: -.01em; }
+.kiosk-header .ks-tagline { font-size: .75rem; opacity: .8; letter-spacing: .03em; }
 .kiosk-header .spacer { flex: 1; }
-.kiosk-header .ks-time { font-size: 1rem; font-weight: 600; }
+.kiosk-header .ks-right { display: flex; align-items: center; gap: 12px; }
+.kiosk-header .ks-time {
+  font-size: 1rem; font-weight: 700;
+  background: rgba(255,255,255,.12);
+  padding: 6px 14px; border-radius: 999px;
+  letter-spacing: .03em;
+}
 
+/* Dark/light mode toggle */
+.ks-theme-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  flex-shrink: 0;
+}
+.ks-theme-btn:hover { background: rgba(255,255,255,.28); transform: rotate(20deg); }
+
+/* ---- Main content area ---- */
 .kiosk-main {
-  flex: 1; padding: 24px 32px 120px;
-  max-width: 1400px; width: 100%; margin: 0 auto;
+  flex: 1;
+  padding: 28px 36px 140px;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
 }
 
+/* ---- Toolbar (search) ---- */
 .kiosk-toolbar {
-  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.kiosk-toolbar .ks-search-wrap {
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+}
+.kiosk-toolbar .ks-search-wrap .ks-search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 18px; pointer-events: none; opacity: .6;
+}
+.kiosk-toolbar .ks-search-wrap .input {
+  padding-left: 44px;
+  padding-top: 12px; padding-bottom: 12px;
+  font-size: 1rem;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.kiosk-toolbar .ks-search-wrap .input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46,125,50,.15);
 }
 
-/* Larger cards in kiosk */
-.kiosk-main .item-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-.kiosk-main .item-card { padding: 16px; border-width: 3px; }
-.kiosk-main .item-card .name { font-size: 1.0625rem; }
-.kiosk-main .item-card .price { font-size: 1.375rem; }
-.kiosk-main .item-card .qty-stepper button { width: 40px; height: 40px; font-size: 22px; }
-.kiosk-main .item-card .qty-stepper input { width: 56px; height: 40px; font-size: 1.125rem; }
+/* ---- Category pill tabs ---- */
+.ks-cat-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 12px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 8px;
+}
+.ks-cat-tabs::-webkit-scrollbar { display: none; }
+.ks-cat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: .9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), color var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+.ks-cat-tab:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.ks-cat-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(46,125,50,.35);
+}
 
+/* ---- Results count ---- */
+.ks-results-meta {
+  font-size: .8125rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  padding-left: 2px;
+}
+
+/* ---- Product grid (big tiles, 2-3 cols) ---- */
+.kiosk-main .item-grid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* ---- Product card ---- */
+.kiosk-main .item-card {
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+}
+.kiosk-main .item-card:hover:not(.no-stock) {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.kiosk-main .item-card.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(46,125,50,.18), var(--shadow-md);
+  background: rgba(46,125,50,.03);
+}
+
+/* Image area */
+.kiosk-main .item-card .img-wrap {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--bg);
+  position: relative;
+  flex-shrink: 0;
+}
+.kiosk-main .item-card .img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 300ms ease;
+}
+.kiosk-main .item-card:hover:not(.no-stock) .img-wrap img { transform: scale(1.04); }
+.kiosk-main .item-card .img-wrap .no-image {
+  font-size: 56px;
+  color: var(--text-muted);
+  opacity: .4;
+}
+
+/* Out-of-stock overlay on image */
+.kiosk-main .item-card.no-stock { opacity: 1; pointer-events: auto; }
+.kiosk-main .item-card.no-stock .img-wrap::after {
+  content: "Out of Stock";
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 1rem;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.kiosk-main .item-card.no-stock .actions { pointer-events: none; }
+
+/* Card body */
+.kiosk-main .item-card .card-body {
+  padding: 16px 18px 18px;
+  display: flex; flex-direction: column; gap: 8px;
+  flex: 1;
+}
+.kiosk-main .item-card .name {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+.kiosk-main .item-card .meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .8125rem; color: var(--text-muted);
+}
+.kiosk-main .item-card .meta .ks-cat-badge {
+  background: rgba(46,125,50,.1);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 600;
+  font-size: .75rem;
+}
+.kiosk-main .item-card .meta .ks-stock {
+  font-size: .8125rem;
+}
+.kiosk-main .item-card .ks-stock-low { color: var(--warning); font-weight: 600; }
+.kiosk-main .item-card .price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -.01em;
+}
+.kiosk-main .item-card .actions {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex; justify-content: center; align-items: center;
+}
+
+/* Large touch-friendly stepper */
+.kiosk-main .item-card .qty-stepper {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+}
+.kiosk-main .item-card.selected .qty-stepper { border-color: var(--primary); }
+.kiosk-main .item-card .qty-stepper button {
+  width: 56px; height: 52px;
+  font-size: 26px; font-weight: 700;
+  background: var(--bg);
+  flex-shrink: 0;
+  border: 0;
+  color: var(--primary);
+  transition: background var(--transition);
+}
+.kiosk-main .item-card .qty-stepper button:hover { background: rgba(46,125,50,.1); }
+.kiosk-main .item-card .qty-stepper input {
+  flex: 1;
+  height: 52px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: 0;
+  border-left: 2px solid var(--border);
+  border-right: 2px solid var(--border);
+  text-align: center;
+  color: var(--text);
+  background: var(--surface);
+  min-width: 0;
+}
+
+/* ---- Pagination (larger for kiosk) ---- */
+.kiosk-main .pagination button {
+  min-width: 44px; height: 44px;
+  font-size: 1rem;
+  border-radius: var(--radius-md);
+}
+
+/* ---- Cart FAB (polished + pulse) ---- */
+.cart-fab {
+  width: 72px !important; height: 72px !important;
+  font-size: 28px !important;
+  box-shadow: 0 6px 20px rgba(46,125,50,.45) !important;
+  right: 32px !important; bottom: 32px !important;
+}
+.cart-fab.has-items {
+  animation: ks-fab-pulse 2.5s infinite;
+}
+@keyframes ks-fab-pulse {
+  0%   { box-shadow: 0 6px 20px rgba(46,125,50,.45); }
+  50%  { box-shadow: 0 6px 32px rgba(46,125,50,.7), 0 0 0 8px rgba(46,125,50,.12); }
+  100% { box-shadow: 0 6px 20px rgba(46,125,50,.45); }
+}
+.cart-fab .cart-count {
+  min-width: 26px; height: 26px;
+  font-size: .875rem !important;
+  padding: 0 8px !important;
+  top: -6px !important; right: -6px !important;
+}
+
+/* ---- Cart drawer (kiosk sizing upgrades) ---- */
+.cart-drawer { max-width: 460px !important; }
+.cart-drawer-header { padding: 20px 24px; }
+.cart-drawer-header h3 { font-size: 1.25rem; font-weight: 800; }
+.cart-drawer-body { padding: 16px 20px; }
+.cart-drawer-footer { padding: 20px 24px; }
+.cart-drawer-footer .btn-lg {
+  font-size: 1.125rem; min-height: 54px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(46,125,50,.3);
+}
+.cart-totals { font-size: 1.25rem; margin-bottom: 16px; }
+
+/* ---- Kiosk disabled state ---- */
 .kiosk-disabled {
   display: grid; place-items: center; min-height: 70vh; padding: 32px;
 }
 .kiosk-disabled .kd-card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 48px;
+  border-radius: var(--radius-lg); padding: 56px 48px;
   max-width: 520px; text-align: center; box-shadow: var(--shadow-md);
 }
-.kiosk-disabled .kd-icon { font-size: 64px; margin-bottom: 16px; }
-.kiosk-disabled h2 { color: var(--primary); }
+.kiosk-disabled .kd-icon { font-size: 72px; margin-bottom: 20px; }
+.kiosk-disabled h2 { color: var(--primary); font-size: 1.75rem; }
 
-/* Hide cart fab when kiosk-disabled state shows */
+/* Hide cart fab when kiosk-disabled */
 .kiosk-disabled ~ .cart-fab,
 .kiosk-disabled ~ * .cart-fab { display: none; }
+
+/* ---- Idle warning toast ---- */
+.ks-idle-toast {
+  position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.82); color: #fff;
+  padding: 14px 28px; border-radius: 999px;
+  font-size: .9375rem; font-weight: 600;
+  z-index: 600; pointer-events: none;
+  opacity: 0; transition: opacity 400ms ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+.ks-idle-toast.show { opacity: 1; }
+
+/* ---- Empty state (kiosk-sized) ---- */
+.kiosk-main .empty-state { padding: 80px 16px; font-size: 1.0625rem; }
+.kiosk-main .empty-state .es-icon { font-size: 64px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .kiosk-header { padding: 0 20px; }
+  .kiosk-main { padding: 20px 16px 140px; }
+  .kiosk-main .item-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+}
+@media (max-width: 600px) {
+  .kiosk-header h1 { font-size: 1.125rem; }
+  .kiosk-main .item-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .kiosk-main .item-card .qty-stepper button { width: 44px; height: 46px; font-size: 22px; }
+  .kiosk-main .item-card .qty-stepper input { height: 46px; font-size: 1.125rem; }
+  .kiosk-main .item-card .price { font-size: 1.25rem; }
+  .cart-fab { width: 62px !important; height: 62px !important; font-size: 24px !important; right: 20px !important; bottom: 20px !important; }
+}
