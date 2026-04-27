@@ -34,10 +34,14 @@
     }
   }
 
+  // Per-page default theme when user has no saved preference (set via data-page-default-theme on <html>)
+  const PAGE_DEFAULT = document.documentElement.dataset.pageDefaultTheme || null;
+
   function resolve() {
     if (FORCE_DARK) return 'dark';
     const saved = localStorage.getItem('theme') || USER_PREF;
     if (saved === 'light' || saved === 'dark') return saved;
+    if (PAGE_DEFAULT === 'light' || PAGE_DEFAULT === 'dark') return PAGE_DEFAULT;
     return null; // auto -> let CSS prefers-color-scheme handle it
   }
 

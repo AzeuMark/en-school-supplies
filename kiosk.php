@@ -16,7 +16,7 @@ $categories = [];
 try { $categories = $pdo->query("SELECT id, category_name FROM item_categories ORDER BY category_name")->fetchAll(); } catch (Throwable $e) {}
 ?>
 <!doctype html>
-<html lang="en" data-force-dark="<?= e($force_dark) ?>">
+<html lang="en" data-force-dark="<?= e($force_dark) ?>" data-page-default-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

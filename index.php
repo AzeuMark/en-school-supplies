@@ -17,7 +17,7 @@ try {
 } catch (Throwable $e) { /* table may not exist before setup */ }
 ?>
 <!doctype html>
-<html lang="en" data-force-dark="<?= e($force_dark) ?>">
+<html lang="en" data-force-dark="<?= e($force_dark) ?>" data-page-default-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -364,6 +364,7 @@ try {
     font-size: .9375rem;
     color: var(--text);
     line-height: 1.3;
+    text-align: center;
   }
   .lp-item-card .lp-item-meta {
     font-size: .8125rem;
@@ -371,12 +372,15 @@ try {
     display: flex;
     align-items: center;
     gap: 4px;
+    display: block;
+    text-align: center;
   }
   .lp-item-card .lp-item-price {
     font-size: 1.125rem;
     font-weight: 800;
     color: var(--primary);
     margin-top: auto;
+    text-align: right;
   }
   .lp-stock-badge {
     display: inline-flex;
@@ -571,7 +575,6 @@ try {
       <div class="lp-footer-divider"></div>
 
       <div class="lp-footer-bottom">
-        <span>System status: <span class="system-status <?= e($status) ?>"><span class="dot"></span><?= e(ucfirst($status)) ?></span></span>
         <span>© <?= date('Y') ?> <?= e($store_name) ?></span>
       </div>
     </div>
