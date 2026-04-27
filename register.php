@@ -68,12 +68,12 @@ $old = flash_pop('flash_old') ?? [];
         <div class="row">
           <div class="field">
             <label for="password">Password</label>
-            <input class="input" id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
-            <div class="field-help">At least 8 characters, with letters and numbers.</div>
+            <input class="input" id="password" name="password" type="password" required minlength="4" autocomplete="new-password">
+            <div class="field-help">At least 4 characters, with letters and numbers.</div>
           </div>
           <div class="field">
             <label for="password2">Confirm Password</label>
-            <input class="input" id="password2" name="password2" type="password" required minlength="8" autocomplete="new-password">
+            <input class="input" id="password2" name="password2" type="password" required minlength="4" autocomplete="new-password">
           </div>
         </div>
         <button class="btn btn-block btn-lg" type="submit">Register</button>

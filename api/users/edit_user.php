@@ -39,8 +39,8 @@ if (!valid_username($username)) $errors[] = 'Username is required and must use l
 if (!valid_email($email)) $errors[] = 'Valid email required.';
 if ($phone === '') $errors[] = 'Phone required.';
 if (!in_array($role, ['admin', 'staff', 'customer'], true)) $errors[] = 'Invalid role.';
-if ($password !== '' && (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password))) {
-    $errors[] = 'New password must be 8+ chars with letters and numbers.';
+if ($password !== '' && (strlen($password) < 4 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password))) {
+    $errors[] = 'New password must be 4+ chars with letters and numbers.';
 }
 $stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ? AND id <> ?");
 $stmt->execute([$username, $id]);

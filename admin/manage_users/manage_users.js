@@ -4,18 +4,74 @@
   const pagEl = document.getElementById('pagination');
   const search = document.getElementById('search');
   const fRole = document.getElementById('filter-role');
-  const fStatus = document.getElementById('filter-status');
+  const fDate = document.getElementById('filter-date');
+  const sortPreset = document.getElementById('sort-preset');
+  const tabs = document.querySelector('[data-status-tabs]');
+  const filterSummaryEl = document.getElementById('filter-summary');
+  const resetBtn = document.querySelector('[data-reset-filters]');
+  const currentAdminId = window.__CURRENT_ADMIN_ID || 0;
 
-  let state = { page: 1, q: '', role: '', status: '' };
+  let state = { page: 1, q: '', role: 'all', status: '', dateFilter: 'all', sort: 'newest' };
+  let searchTimer = null;
+
+  const statusLabelMap = {
+    '': 'All Statuses',
+    active: 'Active',
+    pending: 'Pending',
+    flagged: 'Flagged',
+  };
+
+  const roleLabelMap = {
+    all: 'All Roles',
+    admin: 'Admin',
+    staff: 'Staff',
+    customer: 'Customer',
+  };
+
+  const dateLabelMap = {
+    all: 'All Time',
+    today: 'Today',
+    week: 'Last 7 Days',
+    month: 'Last 30 Days',
+  };
+
+  const sortLabelMap = {
+    newest: 'Newest First',
+    oldest: 'Oldest First',
+    name_asc: 'Name (A-Z)',
+    name_desc: 'Name (Z-A)',
+    role_asc: 'Role (A-Z)',
+    role_desc: 'Role (Z-A)',
+  };
+
+  function updateFilterSummary() {
+    if (!filterSummaryEl) return;
+    const parts = [];
+    if (state.q) parts.push(`Search: "${state.q}"`);
+    if (state.status) parts.push(`Status: ${statusLabelMap[state.status]}`);
+    if (state.role !== 'all') parts.push(`Role: ${roleLabelMap[state.role] || state.role}`);
+    if (state.dateFilter !== 'all') parts.push(`Date: ${dateLabelMap[state.dateFilter]}`);
+    const filtersText = parts.length ? parts.join(' • ') : 'Showing all users';
+    const sortText = sortLabelMap[state.sort] || sortLabelMap.newest;
+    filterSummaryEl.textContent = `${filtersText} • Sorted by ${sortText}`;
+  }
 
   async function load() {
     tbl.innerHTML = '<div class="empty-state">Loading...</div>';
-    const params = new URLSearchParams({ page: state.page, q: state.q, role: state.role, status: state.status });
+    const params = new URLSearchParams({
+      page: state.page,
+      q: state.q,
+      role: state.role,
+      status: state.status,
+      date_filter: state.dateFilter,
+      sort: state.sort,
+    });
     const res = await fetch(EN.BASE + '/api/users/list.php?' + params.toString());
     const data = await res.json();
     if (!data.ok) { tbl.innerHTML = '<div class="empty-state">Failed to load.</div>'; return; }
     render(data.users);
     Pagination.render(pagEl, { current: data.page, total: data.total_pages, onChange: (p) => { state.page = p; load(); } });
+    updateFilterSummary();
   }
 
   function render(users) {
@@ -23,7 +79,9 @@
     tbl.innerHTML = `<div class="table-wrap"><table class="table">
       <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
       <tbody>
-        ${users.map(u => `
+        ${users.map(u => {
+          const isSelf = u.id === currentAdminId;
+          return `
           <tr>
             <td>#${u.id}</td>
             <td>${EN.escapeHtml(u.username || '')}</td>
@@ -34,13 +92,17 @@
             <td><span class="badge status-${u.status}">${u.status}</span></td>
             <td>${u.status === 'flagged' ? `<span class="text-muted">${EN.escapeHtml(u.flag_reason || 'No reason provided')}</span>` : (u.status === 'pending' ? '<span class="text-muted">Awaiting approval</span>' : '<span class="text-muted">—</span>')}</td>
             <td><div class="actions">
-              <button class="btn btn-sm btn-secondary" data-edit='${JSON.stringify(u).replace(/'/g,"&#39;")}' title="Edit">✏️</button>
-              ${u.status === 'pending' ? `<button class="btn btn-sm" data-approve="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Approve">✓ Approve</button>` : ''}
-              ${u.role !== 'admin' && u.status === 'flagged' ? `<button class="btn btn-sm" data-unflag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Unflag">↺ Unflag</button>` : ''}
-              ${u.role !== 'admin' && u.status !== 'flagged' ? `<button class="btn btn-sm btn-warning" data-flag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Flag">🚩</button>` : ''}
-              ${u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" data-del="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Delete">🗑️</button>` : ''}
+              ${isSelf
+                ? '<span class="badge badge-info action-protected" title="You cannot edit your own account from this page">🔒 Protected</span>'
+                : `<button class="btn btn-sm btn-secondary" data-edit='${JSON.stringify(u).replace(/'/g,"&#39;")}' title="Edit">✏️</button>`
+              }
+              ${!isSelf && u.status === 'pending' ? `<button class="btn btn-sm" data-approve="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Approve">✓ Approve</button>` : ''}
+              ${!isSelf && u.role !== 'admin' && u.status === 'flagged' ? `<button class="btn btn-sm" data-unflag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Unflag">↺ Unflag</button>` : ''}
+              ${!isSelf && u.role !== 'admin' && u.status !== 'flagged' ? `<button class="btn btn-sm btn-warning" data-flag="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Flag">🚩</button>` : ''}
+              ${!isSelf && u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" data-del="${u.id}" data-name="${EN.escapeHtml(u.full_name)}" title="Delete">🗑️</button>` : ''}
             </div></td>
-          </tr>`).join('')}
+          </tr>`
+        }).join('')}
       </tbody></table></div>`;
   }
 
@@ -130,8 +192,8 @@
         </select>
       </div>
       <div class="field"><label>Password ${edit?'<span class="text-muted">(leave blank to keep)</span>':''}</label>
-        <input class="input" data-f="password" type="password" ${edit?'':'required minlength="8"'}>
-        <div class="field-help">Min 8 chars with letters and numbers.</div>
+        <input class="input" data-f="password" type="password" ${edit?'':'required minlength="4"'}>
+        <div class="field-help">Min 4 chars with letters and numbers.</div>
       </div>`;
   }
   function readForm(bd, edit = false) {
@@ -140,11 +202,57 @@
     return out;
   }
 
-  search.addEventListener('input', () => {
-    clearTimeout(window._dbu); window._dbu = setTimeout(() => { state.q = search.value.trim(); state.page = 1; load(); }, 300);
-  });
-  fRole.addEventListener('change', () => { state.role = fRole.value; state.page = 1; load(); });
-  fStatus.addEventListener('change', () => { state.status = fStatus.value; state.page = 1; load(); });
+  // Status tabs
+  if (tabs) {
+    tabs.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-status]');
+      if (!b) return;
+      tabs.querySelectorAll('button').forEach((x) => x.classList.remove('active'));
+      b.classList.add('active');
+      state.status = b.dataset.status;
+      state.page = 1;
+      load();
+    });
+  }
 
+  // Search
+  search.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { state.q = search.value.trim(); state.page = 1; load(); }, 300);
+  });
+
+  // Role filter
+  if (fRole) {
+    fRole.addEventListener('change', () => { state.role = fRole.value; state.page = 1; load(); });
+  }
+
+  // Date filter
+  if (fDate) {
+    fDate.addEventListener('change', () => { state.dateFilter = fDate.value; state.page = 1; load(); });
+  }
+
+  // Sort
+  if (sortPreset) {
+    sortPreset.addEventListener('change', () => { state.sort = sortPreset.value || 'newest'; state.page = 1; load(); });
+  }
+
+  // Reset filters
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      state = { page: 1, q: '', role: 'all', status: '', dateFilter: 'all', sort: 'newest' };
+      if (search) search.value = '';
+      if (fRole) fRole.value = 'all';
+      if (fDate) fDate.value = 'all';
+      if (sortPreset) sortPreset.value = 'newest';
+      if (tabs) {
+        tabs.querySelectorAll('button').forEach((x) => x.classList.remove('active'));
+        const allTab = tabs.querySelector('button[data-status=""]');
+        if (allTab) allTab.classList.add('active');
+      }
+      load();
+    });
+  }
+
+  updateFilterSummary();
   load();
 })();

@@ -301,6 +301,19 @@
   max-height: 280px; overflow-y: auto; box-shadow: var(--shadow-md);
   display: none;
 }
+.custom-select .cs-options::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-select .cs-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-select .cs-options::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.custom-select .cs-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
 .custom-select.open .cs-options { display: block; }
 .custom-select .cs-option { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .custom-select .cs-option:hover, .custom-select .cs-option.active { background: var(--bg); color: var(--primary); }

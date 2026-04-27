@@ -66,7 +66,7 @@ if ($role === 'admin') {
     $sidebar_items = [
         ['key' => 'dashboard',         'label' => 'Dashboard',          'icon' => '🏠', 'href' => url('/admin/dashboard/dashboard.php')],
         ['key' => 'manage_orders',     'label' => 'Manage Orders',      'icon' => '📦', 'href' => url('/admin/manage_orders/manage_orders.php'), 'badge' => 'pending_orders'],
-        ['key' => 'inventory',         'label' => 'Inventory',          'icon' => '📚', 'href' => url('/admin/inventory/inventory.php')],
+        ['key' => 'inventory',         'label' => 'Inventory',          'icon' => '🗃️', 'href' => url('/admin/inventory/inventory.php')],
         ['key' => 'manage_users',      'label' => 'Manage Users',       'icon' => '👥', 'href' => url('/admin/manage_users/manage_users.php'), 'badge' => 'pending_accounts'],
         ['key' => 'analytics',         'label' => 'Analytics',          'icon' => '📈', 'href' => url('/admin/analytics/analytics.php')],
         ['key' => 'system_settings',   'label' => 'System Settings',    'icon' => '⚙️', 'href' => url('/admin/system_settings/system_settings.php')],

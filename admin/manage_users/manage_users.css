@@ -1,8 +1,101 @@
 /* Manage Users — admin */
 .actions { flex-wrap: wrap; }
 .table td .text-muted { display: inline-block; max-width: 260px; white-space: normal; }
+
+/* Protected badge for self-account */
+.action-protected {
+  background: rgba(25, 118, 210, 0.15);
+  color: var(--info);
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  cursor: help;
+}
+
+/* Users filter card (matching manage_orders design) */
+.users-filters {
+  margin-bottom: var(--space-4);
+}
+
+.users-filters-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.users-filters-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.users-filters-head p {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.users-toolbar-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(170px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.users-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.users-control > span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.users-control-search .search-box {
+  position: relative;
+}
+
+.users-control-search .search-box::before {
+  content: "🔍";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.users-control-search .search-box .input {
+  padding-left: 36px;
+}
+
+.users-filter-summary {
+  margin: 12px 0 0;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 1100px) {
+  .users-toolbar-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+  .users-control-search {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 768px) {
   .table th:nth-child(1), .table td:nth-child(1),
   .table th:nth-child(4), .table td:nth-child(4),
   .table th:nth-child(8), .table td:nth-child(8) { display: none; }
+
+  .users-toolbar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .users-filters-head {
+    flex-direction: column;
+  }
 }

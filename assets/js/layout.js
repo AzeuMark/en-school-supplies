@@ -51,13 +51,12 @@
     const d = new Date();
     const timezone = el.dataset.timezone || 'Asia/Manila';
     el.textContent = d.toLocaleString('en-US', {
-      weekday: 'short', month: 'short', day: 'numeric',
-      hour: 'numeric', minute: '2-digit', hour12: true,
+      hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true,
       timeZone: timezone,
     });
   }
   tick();
-  setInterval(tick, 30000);
+  setInterval(tick, 1000);
 
   // Badge refresh every 30s
   async function refreshBadges() {
