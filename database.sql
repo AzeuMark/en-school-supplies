@@ -140,3 +140,40 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
   KEY `idx_attempts_email` (`email`),
   KEY `idx_attempts_ip` (`ip_address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- SEED DATA
+-- ============================================================
+
+-- ---------- Admin account ----------
+-- Username : admin
+-- Password : admin  (AES-256-CBC encrypted with default config.json keys)
+-- NOTE: If you change aes.key / aes.iv in config.json you must
+--       re-generate this value via aes_encrypt('admin') in PHP.
+INSERT INTO `users`
+  (`full_name`, `username`, `email`, `phone`, `password`, `role`, `status`, `theme_preference`, `created_by`)
+VALUES
+  ('Administrator', 'admin', 'admin@en.com', '', 'ZKdmlSDjoQI5i5aQIPVLBA==', 'admin', 'active', 'auto', NULL)
+ON DUPLICATE KEY UPDATE
+  `full_name` = VALUES(`full_name`),
+  `password`  = VALUES(`password`),
+  `role`      = VALUES(`role`),
+  `status`    = VALUES(`status`);
+
+-- ---------- Default system settings ----------
+INSERT INTO `system_settings` (`setting_key`, `setting_value`) VALUES
+  ('store_name',              'E&N School Supplies'),
+  ('store_phone',             ''),
+  ('store_email',             ''),
+  ('logo_path',               'uploads/system/logo.png'),
+  ('timezone',                'Asia/Manila'),
+  ('system_status',           'online'),
+  ('force_dark',              '0'),
+  ('disable_no_login_orders', '0'),
+  ('online_payment',          '0'),
+  ('auto_logout_hours',       '8'),
+  ('low_stock_percent',       '10'),
+  ('kiosk_idle_seconds',      '90'),
+  ('navbar_country_flag',     'PH')
+ON DUPLICATE KEY UPDATE
+  `setting_value` = VALUES(`setting_value`);
